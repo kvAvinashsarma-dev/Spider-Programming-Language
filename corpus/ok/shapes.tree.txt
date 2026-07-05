@@ -79,7 +79,7 @@ SourceFile
     ParamList
       LParen "("
       Param
-        Ident "figure"
+        Ident "shape"
         Colon ":"
         TypeRef
           Ident "Shape"
@@ -92,7 +92,7 @@ SourceFile
       MatchStmt
         MatchKw "match"
         NameRef
-          Ident "figure"
+          Ident "shape"
         Block
           MatchArm
             Pattern

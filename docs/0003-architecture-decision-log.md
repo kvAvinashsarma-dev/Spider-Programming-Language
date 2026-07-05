@@ -83,6 +83,33 @@ never panics (recursion depth capped, per-line error recovery). Enforced by
 corpus assertions and fuzz tests on every CI run. Every future stage (IDE,
 refactoring, formatter) may rely on these without re-checking.
 
+## ADR-011 — Contextual (soft) keywords
+**Status:** Accepted (2026-07-05) · **Refs:** M1 notes §3 finding 1, M2 notes §2
+Spider's English-word keywords collide with natural identifiers (the LDD
+itself wrote `fn area(shape: Shape)`, which M1 could not parse). Resolution:
+`record`, `choice`, `shape`, `test`, `times`, `together`, `where` are
+keywords only in their grammatical position; wherever a *name* is expected
+they are ordinary identifiers (the parser remaps the token to `Ident`, text
+untouched, losslessness preserved). Operators stay hard forever: `to`, `of`,
+`is`, `in`. Structural words stay hard: `let var fn if else for while repeat
+match try use return say ask spawn do and or not true false public`.
+Disambiguation at statement head: `record X` is a declaration iff followed by
+a name and a line end; `test` iff followed by a string.
+
+## ADR-012 — M2 semantic rulings
+**Status:** Accepted (2026-07-05) · **Refs:** M2 notes §2–3
+(1) No paren-less method arguments; LDD §3.11 amended to `helper.ask("…")`.
+(2) Match arms: expression or `say` line; value-matches must agree in type.
+(3) Trailing expression/match is the implicit return of a non-`Nothing`
+function. (4) Unannotated non-public params are unchecked `Any` until
+cross-function inference (post-M3); public boundaries require annotations.
+(5) Record/variant construction is call syntax, provisional until M4.
+(6) `Any` is the error type: one mistake, one diagnostic — cascades are a
+compiler bug by definition. (7) Interpolated `{name}` segments are
+marked-as-used but not checked until M3 tokenizes interpolation; a warning
+that can be wrong is treated as a defect (W0001 false-positive found and
+fixed via the corpus).
+
 ---
 
 *Add new entries below; never edit accepted entries — supersede them.*

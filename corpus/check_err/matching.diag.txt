@@ -1,0 +1,4 @@
+E0230 6:1 this match does not cover: Blue — add the missing case(s) or a final catch-all name
+E0231 11:5 `Color` has no case named `Purple`
+E0235 14:17 `try` needs something that can fail (Outcome or Maybe), but this is Int
+E0223 16:7 `repeat` needs a whole number, but this is Text

@@ -8,8 +8,8 @@ choice Shape
 shape Drawable
     fn draw(self, canvas: Canvas)
     fn area(self) -> Float
-fn area(figure: Shape) -> Float
-    match figure
+fn area(shape: Shape) -> Float
+    match shape
         Circle(r) -> 3.14159 * r * r
         Rect(w, h) -> w * h
         Dot -> 0.0

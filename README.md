@@ -24,23 +24,26 @@ say "Welcome, {name}!"
 
 ## Project status
 
-**Milestone M1 "Hatchling" — shipped 2026-07-05.** The specification is
-ratified (ADR-001…010) and the first slice of the toolchain is real: lexer,
-error-tolerant parser with lossless syntax trees, Spider Explain diagnostics,
-the canonical formatter, and a golden-file + fuzz test harness — all green in
-CI on the full corpus.
+**Milestone M2 "Spinneret" — shipped 2026-07-05.** The compiler now has a
+semantic brain: name resolution, unification-based type inference (no
+annotations needed on locals, generics instantiated per call site),
+exhaustive-match analysis, `try`/`Outcome` rules, "did you mean" suggestions
+on every unknown name, contextual keywords (`fn area(shape: Shape)` is
+legal — ADR-011), and **59 authored error codes** with what/why/fix
+explanations, the ≥50 gate CI-enforced. 39 tests green.
 
 ```
 cargo build --workspace          # build the toolchain
-cargo test  --workspace          # 23 tests: goldens, fuzz, formatter laws
-spider check file.sp             # parse + teaching diagnostics
+cargo test  --workspace          # 39 tests: goldens, fuzz, inference corpus
+spider check file.sp             # parse + names + types, teaching diagnostics
 spider fmt  file.sp              # canonical formatting (no options)
 spider tree / tokens / explain   # debugging & the error database
 ```
 
-Next: **M2 "Spinneret"** — name resolution, type inference, top-50 error
-codes authored, and rulings on the M1 design findings
-([docs/0004](docs/0004-m1-hatchling-notes.md) §3).
+Shipped so far: M1 Hatchling ([notes](docs/0004-m1-hatchling-notes.md)),
+M2 Spinneret ([notes](docs/0005-m2-spinneret-notes.md)).
+Next: **M3 "Silk"** — the bytecode VM: `spider run`, the REPL, tokenized
+string interpolation, and the < 50 ms cold-start budget measured in CI.
 
 ## Documents
 

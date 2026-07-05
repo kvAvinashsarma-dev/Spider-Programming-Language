@@ -39,7 +39,11 @@
   needed because expressions continue inside open brackets.
 - No sigils on identifiers. `snake_case` values/functions, `CapWords` types.
 - Keywords are common English words: `let`, `var`, `fn`, `if`, `else`, `for`,
-  `in`, `match`, `try`, `use`, `public`, `spawn`, `say`, `ask`.
+  `in`, `match`, `try`, `use`, `public`, `spawn`, `say`, `ask`. Because
+  English words make good variable names too, several keywords are
+  *contextual*: `record`, `choice`, `shape`, `test`, `times`, `together`,
+  and `where` are only special in their grammatical position, so
+  `fn area(shape: Shape)` is legal (ADR-011).
 - String interpolation with `{}`: `"Hello, {name}!"` — the one string feature
   every beginner needs on day one.
 - Comments: `#` line comments; `##` doc comments (feed `spider doc`).
@@ -216,7 +220,7 @@ use ai                         # requires "ai" capability
 
 let helper = ai.model()        # resolved from project config — provider-agnostic
 
-let summary: Text = try helper.ask "Summarize in one sentence: {report}"
+let summary: Text = try helper.ask("Summarize in one sentence: {report}")
     else "Summary unavailable."
 
 record Sentiment

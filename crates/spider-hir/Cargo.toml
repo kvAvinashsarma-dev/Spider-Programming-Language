@@ -1,0 +1,9 @@
+[package]
+name = "spider-hir"
+description = "Name resolution and the type-inference core for Spider (Milestone M2)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+spider-syntax = { path = "../spider-syntax" }

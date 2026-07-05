@@ -7,11 +7,19 @@ name = "spider-cli"
 version = "0.1.0"
 dependencies = [
  "spider-fmt",
+ "spider-hir",
  "spider-syntax",
 ]
 
 [[package]]
 name = "spider-fmt"
+version = "0.1.0"
+dependencies = [
+ "spider-syntax",
+]
+
+[[package]]
+name = "spider-hir"
 version = "0.1.0"
 dependencies = [
  "spider-syntax",

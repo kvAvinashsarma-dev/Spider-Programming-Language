@@ -1,0 +1,4 @@
+E0201 2:4 nothing named `totl` exists here — did you mean `total`?
+E0203 3:1 `total` already exists in this block — assign with `=` to change it
+E0102 4:1 `total` cannot change — create it with `var` instead of `let` if it should
+E0203 9:1 `twice` already exists

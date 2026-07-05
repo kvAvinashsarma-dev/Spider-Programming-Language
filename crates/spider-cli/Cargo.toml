@@ -11,4 +11,5 @@ path = "src/main.rs"
 
 [dependencies]
 spider-syntax = { path = "../spider-syntax" }
+spider-hir = { path = "../spider-hir" }
 spider-fmt = { path = "../spider-fmt" }

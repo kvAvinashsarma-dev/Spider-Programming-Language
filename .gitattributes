@@ -1,0 +1,4 @@
+# Golden files are byte-compared; keep every text file LF everywhere.
+* text=auto eol=lf
+*.png binary
+*.jpg binary

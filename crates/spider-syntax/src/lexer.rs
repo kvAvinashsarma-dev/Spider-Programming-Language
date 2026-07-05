@@ -67,12 +67,7 @@ impl Lexer {
     }
 
     fn diag(&mut self, code: &'static str, message: impl Into<String>, offset: usize, len: usize) {
-        self.diags.push(Diagnostic {
-            code,
-            message: message.into(),
-            offset,
-            len: len.max(1),
-        });
+        self.diags.push(Diagnostic::error(code, message, offset, len));
     }
 
     fn run(mut self) -> (Vec<Token>, Vec<Diagnostic>) {

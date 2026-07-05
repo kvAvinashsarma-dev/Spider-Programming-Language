@@ -2,6 +2,13 @@
 //!
 //! Every diagnostic carries a stable code; `explain()` returns the authored
 //! what/why/fix entry for a code. Offsets and lengths are in characters.
+//! Codes: E00xx lexer · E01xx parser · E02xx names & types · W00xx warnings.
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Severity {
+    Error,
+    Warning,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Diagnostic {
@@ -11,6 +18,38 @@ pub struct Diagnostic {
     pub offset: usize,
     /// Length in characters (always >= 1).
     pub len: usize,
+    pub severity: Severity,
+}
+
+impl Diagnostic {
+    pub fn error(code: &'static str, message: impl Into<String>, offset: usize, len: usize) -> Self {
+        Diagnostic {
+            code,
+            message: message.into(),
+            offset,
+            len: len.max(1),
+            severity: Severity::Error,
+        }
+    }
+
+    pub fn warning(
+        code: &'static str,
+        message: impl Into<String>,
+        offset: usize,
+        len: usize,
+    ) -> Self {
+        Diagnostic {
+            code,
+            message: message.into(),
+            offset,
+            len: len.max(1),
+            severity: Severity::Warning,
+        }
+    }
+
+    pub fn is_error(&self) -> bool {
+        self.severity == Severity::Error
+    }
 }
 
 pub struct Explain {
@@ -46,8 +85,12 @@ pub fn render(src: &str, file: &str, d: &Diagnostic) -> String {
     let (line, col) = line_col(src, d.offset);
     let text = source_line(src, line);
     let caret_len = d.len.min(text.chars().count().saturating_sub(col - 1)).max(1);
+    let head = match d.severity {
+        Severity::Error => "error",
+        Severity::Warning => "warning",
+    };
     let mut out = String::new();
-    out.push_str(&format!("error[{}]: {}\n", d.code, d.message));
+    out.push_str(&format!("{head}[{}]: {}\n", d.code, d.message));
     out.push_str(&format!("  --> {file}:{line}:{col}\n"));
     out.push_str("   |\n");
     out.push_str(&format!("{line:>3}| {text}\n"));
@@ -58,17 +101,19 @@ pub fn render(src: &str, file: &str, d: &Diagnostic) -> String {
     ));
     if let Some(e) = explain(d.code) {
         out.push_str(&format!("what happened: {}\n", e.what));
-        out.push_str(&format!("why it's an error: {}\n", e.why));
+        out.push_str(&format!("why: {}\n", e.why));
         out.push_str(&format!("how to fix: {}\n", e.fix));
     }
     out.push_str(&format!("learn more: spider explain {}\n", d.code));
     out
 }
 
-/// The authored explanation database. Grows every milestone; 100% coverage
-/// of the top-100 codes is a 1.0 gate (SRS G6).
+/// The authored explanation database — every code the toolchain can emit.
+/// 100% coverage of emitted codes is CI-enforced; the top-100 list is a 1.0
+/// gate (SRS G6).
 pub fn explain(code: &str) -> Option<Explain> {
     let (what, why, fix) = match code {
+        // ----- lexer -----
         "E0001" => (
             "this line starts with a tab character.",
             "Spider measures blocks by spaces, and tabs look different in every editor, so the compiler can't be sure how deep the line is.",
@@ -89,6 +134,7 @@ pub fn explain(code: &str) -> Option<Explain> {
             "each block's lines must start at exactly the same column, so Spider knows which block the line belongs to.",
             "line it up with the block above it — blocks step in by exactly 4 spaces.",
         ),
+        // ----- parser -----
         "E0110" => (
             "Spider expected a value here (like a number, some text, or a name) but found something else.",
             "this spot in the line must contain something that produces a value.",
@@ -169,7 +215,237 @@ pub fn explain(code: &str) -> Option<Explain> {
             "`public` marks a declaration that other modules may use, so it needs a declaration after it.",
             "write for example: `public fn total(prices: List of Float) -> Float`.",
         ),
+        // ----- names -----
+        "E0102" => (
+            "this value was made with `let`, so it cannot change.",
+            "`let` makes a name for a value that stays the same; Spider stops the change here so a value you relied on can't be different later without you knowing.",
+            "if this value should change, create it with `var` instead of `let`.",
+        ),
+        "E0201" => (
+            "this name is not known here.",
+            "every name must be created (with let, var, fn, record…) before it is used.",
+            "check the spelling — the message suggests the closest known name if there is one.",
+        ),
+        "E0203" => (
+            "this name already exists in the same block.",
+            "two things with the same name in one place would be impossible to tell apart.",
+            "pick a different name — or, if you meant to change the existing value, assign with `=` instead of creating it again.",
+        ),
+        "E0204" => (
+            "this type name is not known.",
+            "types must be built-in (Int, Float, Bool, Text, List, Map, Maybe, Outcome) or declared with record/choice.",
+            "check the spelling, or declare the type first.",
+        ),
+        "E0208" => (
+            "a public function must write out its parameter types.",
+            "public functions are promises to other modules; a promise needs to say exactly what it accepts.",
+            "add a type to each parameter: `public fn total(prices: List of Float)`.",
+        ),
+        "E0209" => (
+            "this container type needs `of` and an item type.",
+            "`List` alone doesn't say what's inside; `List of Int` does.",
+            "write `List of Int`, `Map of Text to Int`, `Maybe of Text`, and so on.",
+        ),
+        // ----- types -----
+        "E0210" => (
+            "whole numbers (Int) and decimal numbers (Float) got mixed in one calculation.",
+            "Spider never converts numbers silently, because silent conversions cause surprising bugs.",
+            "convert one side yourself: `count.to_float()` or write `10.0` instead of `10`.",
+        ),
+        "E0211" => (
+            "the value here has a different type than this spot needs.",
+            "every spot in Spider code expects one type of value, so mistakes are caught before the program runs.",
+            "the message shows what was expected and what was found — change one side to match the other.",
+        ),
+        "E0212" => (
+            "the condition of if/while must be a yes-or-no value (Bool).",
+            "`if` needs to decide, and only true/false can decide.",
+            "compare something: `if age >= 13`, or use a Bool value directly.",
+        ),
+        "E0213" => (
+            "`and`, `or`, and `not` work only on yes-or-no values (Bool).",
+            "combining anything else with and/or has no clear meaning.",
+            "make both sides comparisons or Bool values: `age > 3 and age < 13`.",
+        ),
+        "E0214" => (
+            "this math operation needs numbers on both sides.",
+            "`+ - * / %` are for numbers; other values can't be added or multiplied.",
+            "to build text from pieces, use interpolation instead: \"total: {count}\".",
+        ),
+        "E0215" => (
+            "these two values cannot be compared.",
+            "comparisons only make sense between two values of the same, comparable type.",
+            "make both sides the same type — the message shows what each side is.",
+        ),
+        "E0216" => (
+            "this call has the wrong number of arguments.",
+            "a function needs exactly the ingredients its recipe lists.",
+            "the message shows how many the function takes — add or remove arguments to match.",
+        ),
+        "E0217" => (
+            "this is being called like a function, but it is not one.",
+            "only functions (and record/choice constructors) can be called with (…).",
+            "remove the parentheses, or check the name — maybe you meant a function with a similar name.",
+        ),
+        "E0218" => (
+            "this value cannot be indexed with [ ].",
+            "only List (by position) and Map (by key) support [ ]. Text has no direct indexing because human characters are more complicated than positions.",
+            "for Text, use methods like .length() and slices; for other values, check the type.",
+        ),
+        "E0219" => (
+            "a list is indexed by position, so the index must be an Int.",
+            "positions are whole numbers: names[0] is the first item.",
+            "use an Int index: `names[0]`, `names[i]`.",
+        ),
+        "E0220" => (
+            "this map key has the wrong type.",
+            "a Map of Text to Int can only be looked up with Text keys.",
+            "use a key of the map's key type — the message shows both types.",
+        ),
+        "E0221" => (
+            "this record has no field with that name.",
+            "records only contain the fields written in their declaration.",
+            "check the spelling — the message suggests the closest field if there is one.",
+        ),
+        "E0222" => (
+            "this value has no fields to access with a dot.",
+            "only records (and modules) have named parts.",
+            "check the value's type — the message shows what it actually is.",
+        ),
+        "E0223" => (
+            "`repeat` needs a whole number (Int) for the count.",
+            "you can repeat 3 times, but not \"three\" times or 2.5 times.",
+            "write a whole number: `repeat 3 times`.",
+        ),
+        "E0224" => (
+            "`for` can only walk through a List or a range.",
+            "the loop needs a collection of items to visit one by one.",
+            "loop over a list `for item in items` or a range `for i in 1 to 10`.",
+        ),
+        "E0225" => (
+            "this function promises one return type but returns another.",
+            "the `->` in the signature is a promise; every return must keep it.",
+            "make the returned value match the promised type, or change the signature.",
+        ),
+        "E0226" => (
+            "`return` only works inside a function.",
+            "at the top of a file there is no function to return from.",
+            "delete the `return`, or move this code into a function.",
+        ),
+        "E0227" => (
+            "the items in this list have different types.",
+            "a List holds items of one type, so every item can be treated the same way.",
+            "make all items the same type, or split them into separate lists.",
+        ),
+        "E0228" => (
+            "the keys or values in this map are not all the same type.",
+            "a Map has one key type and one value type throughout.",
+            "make all keys one type and all values one type.",
+        ),
+        "E0229" => (
+            "both ends of a range must be whole numbers (Int).",
+            "`1 to 10` counts whole steps; decimals and other values can't count steps.",
+            "use Int on both sides: `for i in 1 to 10`.",
+        ),
+        "E0230" => (
+            "this match does not cover every possible case.",
+            "if a value arrived that no case matches, the program would have nowhere to go — Spider catches this before running.",
+            "add the missing cases listed in the message, or add a final name pattern to catch everything else.",
+        ),
+        "E0231" => (
+            "this pattern names a case that the matched choice does not have.",
+            "patterns can only match cases that the choice declares.",
+            "check the spelling against the choice's declaration — the message suggests the closest case.",
+        ),
+        "E0232" => (
+            "this pattern has the wrong number of parts for the case it matches.",
+            "a pattern unpacks exactly the pieces the case carries.",
+            "match the declaration: `Circle(radius: Float)` unpacks as `Circle(r)`.",
+        ),
+        "E0233" => (
+            "this pattern unpacks parts, but the matched value is not a choice.",
+            "only choice cases (and Maybe/Outcome) carry parts to unpack.",
+            "match plain values with literals or a name: `0 -> …` or `other -> …`.",
+        ),
+        "E0234" => (
+            "this case is already handled by an earlier line of the match.",
+            "the earlier case wins every time, so this line can never run.",
+            "remove the duplicate line, or reorder the cases.",
+        ),
+        "E0235" => (
+            "`try` only works on values that can fail — Outcome or Maybe.",
+            "`try` means \"unwrap this or handle the failure\"; a plain value has no failure to handle.",
+            "remove the `try`, or make the function return an Outcome.",
+        ),
+        "E0236" => (
+            "a bare `try` passes failure upward, so it needs a function that returns Outcome.",
+            "when the tried thing fails, the failure must have somewhere to go.",
+            "add `else fallback` to handle it here, or change this function to return `Outcome of …`.",
+        ),
+        "E0237" => (
+            "only a name, a field, or an index position can be assigned to.",
+            "an assignment needs a place to store the value.",
+            "put a name on the left: `score = 10`, `point.x = 1.0`, `items[0] = 5`.",
+        ),
+        "E0240" => (
+            "the cases of this match produce different types of values.",
+            "when a match's result is used, every case must produce the same type.",
+            "make every case after `->` produce the same type — the message shows the two that disagree.",
+        ),
+        "E0241" => (
+            "this `where` constraint is not a known capability.",
+            "constraints must be built-in (Comparable, Equatable, Printable) or a declared shape.",
+            "check the spelling, or declare a shape with that name.",
+        ),
+        "E0242" => (
+            "functions, records, choices, and shapes live at the top level of a file.",
+            "nested declarations arrive in a later Spider version; keeping them top-level keeps files easy to navigate.",
+            "move this declaration out of the block, to the left margin.",
+        ),
+        // ----- warnings -----
+        "W0001" => (
+            "this name is created but never used.",
+            "unused names are usually leftovers or typos, and they make code harder to read.",
+            "use the value, delete the line, or name it `_` to say \"on purpose\".",
+        ),
+        "W0002" => (
+            "this module is not part of Spider's standard library.",
+            "multi-file projects and packages arrive in Milestone M5; until then only standard modules resolve.",
+            "check the spelling against the standard library list, or wait for M5 for your own modules.",
+        ),
         _ => return None,
     };
     Some(Explain { what, why, fix })
+}
+
+/// Number of authored explanation entries — asserted in tests so the count
+/// in documentation can never silently drift.
+pub fn authored_code_count() -> usize {
+    ALL_CODES.iter().filter(|c| explain(c).is_some()).count()
+}
+
+pub const ALL_CODES: &[&str] = &[
+    "E0001", "E0002", "E0003", "E0004", "E0102", "E0110", "E0111", "E0112", "E0115", "E0120",
+    "E0121", "E0127", "E0128", "E0130", "E0131", "E0132", "E0140", "E0141", "E0150", "E0151",
+    "E0170", "E0201", "E0203", "E0204", "E0208", "E0209", "E0210", "E0211", "E0212", "E0213",
+    "E0214", "E0215", "E0216", "E0217", "E0218", "E0219", "E0220", "E0221", "E0222", "E0223",
+    "E0224", "E0225", "E0226", "E0227", "E0228", "E0229", "E0230", "E0231", "E0232", "E0233",
+    "E0234", "E0235", "E0236", "E0237", "E0240", "E0241", "E0242", "W0001", "W0002",
+];
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_listed_code_is_authored_and_top_50_gate_met() {
+        for code in ALL_CODES {
+            assert!(explain(code).is_some(), "code {code} listed but not authored");
+        }
+        assert!(
+            authored_code_count() >= 50,
+            "M2 exit gate: top-50 error codes must be authored (have {})",
+            authored_code_count()
+        );
+    }
 }

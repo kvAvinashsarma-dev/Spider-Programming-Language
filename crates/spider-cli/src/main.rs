@@ -166,21 +166,28 @@ fn cmd_check(args: &[String]) -> i32 {
             return 2;
         }
     };
-    let p = spider_syntax::parse(&src);
-    if p.diagnostics.is_empty() {
+    // Syntax first; names and types only run over a clean parse, so every
+    // message describes the user's actual mistake, not a recovery artifact.
+    let diags = spider_hir::check_source(&src);
+    if diags.is_empty() {
         println!("OK: no problems found in {}", path.display());
         return 0;
     }
-    for d in &p.diagnostics {
+    for d in &diags {
         print!("{}", spider_syntax::render(&src, &path.display().to_string(), d));
         println!();
     }
+    let errors = diags.iter().filter(|d| d.is_error()).count();
+    let warnings = diags.len() - errors;
     println!(
-        "{} problem(s) found in {}",
-        p.diagnostics.len(),
+        "{errors} error(s), {warnings} warning(s) in {}",
         path.display()
     );
-    1
+    if errors > 0 {
+        1
+    } else {
+        0
+    }
 }
 
 fn cmd_tree(args: &[String]) -> i32 {

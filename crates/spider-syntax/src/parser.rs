@@ -194,17 +194,70 @@ impl Parser {
         }
     }
 
+    // ----- soft keywords (ADR-011) -----
+    // Common English words are only keywords in their grammatical position;
+    // everywhere a *name* is expected they are ordinary identifiers, so
+    // `fn area(shape: Shape)` and `let times = 3` are legal Spider.
+
+    fn kind_is_name(k: SyntaxKind) -> bool {
+        matches!(
+            k,
+            K::Ident
+                | K::RecordKw
+                | K::ChoiceKw
+                | K::ShapeKw
+                | K::TestKw
+                | K::TimesKw
+                | K::TogetherKw
+                | K::WhereKw
+        )
+    }
+
+    fn at_name(&self) -> bool {
+        Self::kind_is_name(self.current())
+    }
+
+    /// Bumps the next token as a name, remapping soft keywords to `Ident`
+    /// so every later stage sees a plain identifier. Text is untouched, so
+    /// losslessness holds.
+    fn bump_name(&mut self) {
+        self.attach_trivia();
+        if self.pos < self.tokens.len() {
+            let mut t = self.tokens[self.pos].clone();
+            if t.kind != K::Ident {
+                t.kind = K::Ident;
+            }
+            self.stack
+                .last_mut()
+                .expect("bump without node")
+                .children
+                .push(Element::Token(t));
+            self.pos += 1;
+        }
+    }
+
+    fn expect_name(&mut self, code: &'static str, message: &str) -> bool {
+        if self.at_name() {
+            self.bump_name();
+            return true;
+        }
+        self.error_at_current(code, message.to_string());
+        false
+    }
+
+    /// `record`/`choice`/`shape` start a declaration only when followed by a
+    /// name and then a line end — otherwise they are ordinary identifiers.
+    fn decl_follows(&self) -> bool {
+        Self::kind_is_name(self.nth(1)) && matches!(self.nth(2), K::Newline | K::Eof)
+    }
+
     // ----- diagnostics -----
 
     fn error_at_current(&mut self, code: &'static str, message: impl Into<String>) {
         let i = self.peek_index(0);
         let len = self.tokens[i].text.chars().count().max(1);
-        self.diags.push(Diagnostic {
-            code,
-            message: message.into(),
-            offset: self.offsets[i],
-            len,
-        });
+        self.diags
+            .push(Diagnostic::error(code, message, self.offsets[i], len));
     }
 
     fn expect(&mut self, kind: SyntaxKind, code: &'static str, message: &str) -> bool {
@@ -323,10 +376,10 @@ impl Parser {
                 }
             },
             K::FnKw => self.fn_decl(),
-            K::RecordKw => self.record_decl(),
-            K::ChoiceKw => self.choice_decl(),
-            K::ShapeKw => self.shape_decl(),
-            K::TestKw => self.test_decl(),
+            K::RecordKw if self.decl_follows() => self.record_decl(),
+            K::ChoiceKw if self.decl_follows() => self.choice_decl(),
+            K::ShapeKw if self.decl_follows() => self.shape_decl(),
+            K::TestKw if self.nth(1) == K::StrLit => self.test_decl(),
             K::LetKw => self.binding(K::LetStmt),
             K::VarKw => self.binding(K::VarStmt),
             K::SayKw => self.kw_expr_stmt(K::SayStmt),
@@ -349,10 +402,10 @@ impl Parser {
     fn use_decl(&mut self) {
         self.start(K::UseDecl);
         self.bump(); // use
-        self.expect(K::Ident, "E0111", "expected a module name after `use`");
+        self.expect_name("E0111", "expected a module name after `use`");
         while self.at(K::Dot) {
             self.bump();
-            self.expect(K::Ident, "E0111", "expected a name after `.`");
+            self.expect_name("E0111", "expected a name after `.`");
         }
         self.end_of_line();
         self.finish();
@@ -362,7 +415,7 @@ impl Parser {
         self.start(K::FnDecl);
         self.eat(K::PublicKw);
         self.bump(); // fn
-        self.expect(K::Ident, "E0111", "expected the function's name after `fn`");
+        self.expect_name("E0111", "expected the function's name after `fn`");
         self.param_list();
         if self.at(K::Arrow) {
             self.start(K::RetType);
@@ -381,7 +434,7 @@ impl Parser {
     fn fn_sig(&mut self) {
         self.start(K::FnSig);
         self.bump(); // fn
-        self.expect(K::Ident, "E0111", "expected the function's name after `fn`");
+        self.expect_name("E0111", "expected the function's name after `fn`");
         self.param_list();
         if self.at(K::Arrow) {
             self.start(K::RetType);
@@ -408,8 +461,8 @@ impl Parser {
 
     fn param(&mut self) {
         self.start(K::Param);
-        if self.at(K::Ident) {
-            self.bump();
+        if self.at_name() {
+            self.bump_name();
         } else {
             self.error_at_current("E0111", "expected a parameter name");
             if !is_recovery_boundary(self.current()) {
@@ -426,9 +479,9 @@ impl Parser {
         self.start(K::WhereClause);
         self.bump(); // where
         loop {
-            self.expect(K::Ident, "E0111", "expected a type name in `where`");
+            self.expect_name("E0111", "expected a type name in `where`");
             self.expect_kind(K::IsKw);
-            self.expect(K::Ident, "E0111", "expected a capability name after `is`");
+            self.expect_name("E0111", "expected a capability name after `is`");
             if !self.eat(K::Comma) {
                 break;
             }
@@ -451,8 +504,8 @@ impl Parser {
         if self.eat(K::LParen) {
             self.type_ref();
             self.expect_kind(K::RParen);
-        } else if self.at(K::Ident) {
-            self.bump();
+        } else if self.at_name() {
+            self.bump_name();
             if self.eat(K::OfKw) {
                 self.type_ref();
                 // `Map of Text to Int` — the `to` arm belongs to the nearest `of`.
@@ -474,10 +527,10 @@ impl Parser {
         self.start(K::RecordDecl);
         self.eat(K::PublicKw);
         self.bump(); // record
-        self.expect(K::Ident, "E0111", "expected the record's name after `record`");
+        self.expect_name("E0111", "expected the record's name after `record`");
         self.decl_block(|p| {
             p.start(K::FieldDecl);
-            p.expect(K::Ident, "E0111", "expected a field name");
+            p.expect_name("E0111", "expected a field name");
             p.expect(K::Colon, "E0115", "expected `:` between the field's name and its type");
             p.type_ref();
             p.end_of_line();
@@ -490,10 +543,10 @@ impl Parser {
         self.start(K::ChoiceDecl);
         self.eat(K::PublicKw);
         self.bump(); // choice
-        self.expect(K::Ident, "E0111", "expected the choice's name after `choice`");
+        self.expect_name("E0111", "expected the choice's name after `choice`");
         self.decl_block(|p| {
             p.start(K::VariantDecl);
-            p.expect(K::Ident, "E0111", "expected a case name");
+            p.expect_name("E0111", "expected a case name");
             if p.at(K::LParen) {
                 p.bump();
                 while !matches!(p.current(), K::RParen | K::Newline | K::Dedent | K::Eof) {
@@ -514,7 +567,7 @@ impl Parser {
         self.start(K::ShapeDecl);
         self.eat(K::PublicKw);
         self.bump(); // shape
-        self.expect(K::Ident, "E0111", "expected the shape's name after `shape`");
+        self.expect_name("E0111", "expected the shape's name after `shape`");
         self.decl_block(|p| {
             if p.at(K::FnKw) {
                 p.fn_sig();
@@ -613,7 +666,7 @@ impl Parser {
     fn binding(&mut self, kind: SyntaxKind) {
         self.start(kind);
         self.bump(); // let / var
-        self.expect(K::Ident, "E0111", "expected a name after `let`/`var`");
+        self.expect_name("E0111", "expected a name after `let`/`var`");
         if self.eat(K::Colon) {
             self.type_ref();
         }
@@ -665,7 +718,7 @@ impl Parser {
     fn for_stmt(&mut self) {
         self.start(K::ForStmt);
         self.bump(); // for
-        self.expect(K::Ident, "E0111", "expected the loop item's name after `for`");
+        self.expect_name("E0111", "expected the loop item's name after `for`");
         self.expect(K::InKw, "E0127", "expected `in` — for item in collection");
         self.expr();
         self.block();
@@ -759,8 +812,8 @@ impl Parser {
         self.start(K::Pattern);
         match self.current() {
             K::IntLit | K::FloatLit | K::StrLit | K::TrueKw | K::FalseKw => self.bump(),
-            K::Ident => {
-                self.bump();
+            k if Self::kind_is_name(k) => {
+                self.bump_name();
                 if self.eat(K::LParen) {
                     while !matches!(self.current(), K::RParen | K::Newline | K::Dedent | K::Eof) {
                         self.pattern();
@@ -946,7 +999,7 @@ impl Parser {
                 K::Dot => {
                     self.wrap_open(cp, K::FieldExpr);
                     self.bump();
-                    self.expect(K::Ident, "E0111", "expected a name after `.`");
+                    self.expect_name("E0111", "expected a name after `.`");
                     self.finish();
                 }
                 K::LBracket => {
@@ -995,9 +1048,9 @@ impl Parser {
                 self.bump();
                 self.finish();
             }
-            K::Ident => {
+            k if Self::kind_is_name(k) => {
                 self.start(K::NameRef);
-                self.bump();
+                self.bump_name();
                 self.finish();
             }
             K::LParen => {

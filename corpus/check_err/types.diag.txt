@@ -1,0 +1,7 @@
+E0210 1:12 whole numbers (Int) and decimals (Float) can't mix — convert one side with .to_float() or write the number with a decimal point
+E0211 3:17 the annotation says Bool, but this value is Text
+E0212 5:3 this condition must be a yes-or-no value (Bool), but it is Int
+E0214 7:4 math needs numbers — to build text from pieces, use interpolation: "total: {count}"
+E0216 12:4 `add` takes 2 argument(s), but got 1
+E0211 13:9 argument 1 of `add` should be Int, but this is Bool
+E0208 15:17 public function `shout` must give `message` a type

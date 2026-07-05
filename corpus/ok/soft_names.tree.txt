@@ -1,0 +1,90 @@
+SourceFile
+  Comment "# Soft keywords (ADR-011): common English words are only special in their"
+  Comment "# grammatical position. Everywhere a name is expected, they are plain names."
+  LetStmt
+    LetKw "let"
+    Ident "times"
+    Assign "="
+    Literal
+      IntLit "3"
+  SayStmt
+    SayKw "say"
+    BinaryExpr
+      NameRef
+        Ident "times"
+      Plus "+"
+      Literal
+        IntLit "1"
+  VarStmt
+    VarKw "var"
+    Ident "record"
+    Assign "="
+    Literal
+      IntLit "1"
+  AssignStmt
+    NameRef
+      Ident "record"
+    PlusAssign "+="
+    Literal
+      IntLit "1"
+  LetStmt
+    LetKw "let"
+    Ident "test"
+    Assign "="
+    BinaryExpr
+      NameRef
+        Ident "record"
+      Star "*"
+      NameRef
+        Ident "times"
+  SayStmt
+    SayKw "say"
+    NameRef
+      Ident "test"
+  RecordDecl
+    RecordKw "record"
+    Ident "Inventory"
+    Block
+      FieldDecl
+        Ident "shape"
+        Colon ":"
+        TypeRef
+          Ident "Text"
+      FieldDecl
+        Ident "where"
+        Colon ":"
+        TypeRef
+          Ident "Text"
+  FnDecl
+    FnKw "fn"
+    Ident "describe"
+    ParamList
+      LParen "("
+      Param
+        Ident "shape"
+        Colon ":"
+        TypeRef
+          Ident "Inventory"
+      RParen ")"
+    RetType
+      Arrow "->"
+      TypeRef
+        Ident "Text"
+    Block
+      ReturnStmt
+        ReturnKw "return"
+        FieldExpr
+          NameRef
+            Ident "shape"
+          Dot "."
+          Ident "where"
+  RepeatStmt
+    RepeatKw "repeat"
+    NameRef
+      Ident "times"
+    TimesKw "times"
+    Block
+      SayStmt
+        SayKw "say"
+        Literal
+          StrLit "\"spinning\""
