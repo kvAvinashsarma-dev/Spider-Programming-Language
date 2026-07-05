@@ -1,0 +1,19 @@
+SourceFile
+  FnDecl
+    FnKw "fn"
+    Ident "f"
+    ParamList
+      LParen "("
+      RParen ")"
+    Block
+      SayStmt
+        SayKw "say"
+        Literal
+          StrLit "\"one\""
+  SayStmt
+    SayKw "say"
+    Literal
+      StrLit "\"two\""
+  ErrorNode
+    SayKw "say"
+    StrLit "\"tab indent\""

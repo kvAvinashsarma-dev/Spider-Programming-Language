@@ -1,0 +1,108 @@
+SourceFile
+  LetStmt
+    LetKw "let"
+    Ident "pi"
+    Assign "="
+    Literal
+      FloatLit "3.14159"
+  VarStmt
+    VarKw "var"
+    Ident "score"
+    Assign "="
+    Literal
+      IntLit "0"
+  AssignStmt
+    NameRef
+      Ident "score"
+    Assign "="
+    BinaryExpr
+      NameRef
+        Ident "score"
+      Plus "+"
+      Literal
+        IntLit "10"
+  AssignStmt
+    NameRef
+      Ident "score"
+    PlusAssign "+="
+    Literal
+      IntLit "5"
+  LetStmt
+    LetKw "let"
+    Ident "title"
+    Colon ":"
+    TypeRef
+      Ident "Text"
+    Assign "="
+    Literal
+      StrLit "\"Spider\""
+  LetStmt
+    LetKw "let"
+    Ident "scores"
+    Colon ":"
+    TypeRef
+      Ident "List"
+      OfKw "of"
+      TypeRef
+        Ident "Int"
+    Assign "="
+    ListExpr
+      LBracket "["
+      Literal
+        IntLit "90"
+      Comma ","
+      Literal
+        IntLit "85"
+      Comma ","
+      Literal
+        IntLit "77"
+      RBracket "]"
+  LetStmt
+    LetKw "let"
+    Ident "ages"
+    Colon ":"
+    TypeRef
+      Ident "Map"
+      OfKw "of"
+      TypeRef
+        Ident "Text"
+      ToKw "to"
+      TypeRef
+        Ident "Int"
+    Assign "="
+    MapExpr
+      LBrace "{"
+      MapEntry
+        Literal
+          StrLit "\"Ada\""
+        Colon ":"
+        Literal
+          IntLit "12"
+      Comma ","
+      MapEntry
+        Literal
+          StrLit "\"Lin\""
+        Colon ":"
+        Literal
+          IntLit "11"
+      RBrace "}"
+  LetStmt
+    LetKw "let"
+    Ident "big"
+    Assign "="
+    Literal
+      IntLit "1_000_000"
+  LetStmt
+    LetKw "let"
+    Ident "tiny"
+    Assign "="
+    Literal
+      FloatLit "2.5e-3"
+  LetStmt
+    LetKw "let"
+    Ident "negative"
+    Assign "="
+    UnaryExpr
+      Minus "-"
+      Literal
+        IntLit "42"

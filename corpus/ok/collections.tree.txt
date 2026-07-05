@@ -1,0 +1,161 @@
+SourceFile
+  LetStmt
+    LetKw "let"
+    Ident "names"
+    Assign "="
+    ListExpr
+      LBracket "["
+      Literal
+        StrLit "\"Ada\""
+      Comma ","
+      Literal
+        StrLit "\"Grace\""
+      Comma ","
+      Literal
+        StrLit "\"Alan\""
+      RBracket "]"
+  LetStmt
+    LetKw "let"
+    Ident "first"
+    Assign "="
+    IndexExpr
+      NameRef
+        Ident "names"
+      LBracket "["
+      Literal
+        IntLit "0"
+      RBracket "]"
+  LetStmt
+    LetKw "let"
+    Ident "empty"
+    Colon ":"
+    TypeRef
+      Ident "List"
+      OfKw "of"
+      TypeRef
+        Ident "Text"
+    Assign "="
+    ListExpr
+      LBracket "["
+      RBracket "]"
+  LetStmt
+    LetKw "let"
+    Ident "nested"
+    Assign "="
+    ListExpr
+      LBracket "["
+      ListExpr
+        LBracket "["
+        Literal
+          IntLit "1"
+        Comma ","
+        Literal
+          IntLit "2"
+        RBracket "]"
+      Comma ","
+      ListExpr
+        LBracket "["
+        Literal
+          IntLit "3"
+        Comma ","
+        Literal
+          IntLit "4"
+        RBracket "]"
+      RBracket "]"
+  LetStmt
+    LetKw "let"
+    Ident "config"
+    Assign "="
+    MapExpr
+      LBrace "{"
+      MapEntry
+        Literal
+          StrLit "\"debug\""
+        Colon ":"
+        Literal
+          TrueKw "true"
+      Comma ","
+      MapEntry
+        Literal
+          StrLit "\"level\""
+        Colon ":"
+        Literal
+          IntLit "3"
+      RBrace "}"
+  SayStmt
+    SayKw "say"
+    CallExpr
+      FieldExpr
+        NameRef
+          Ident "names"
+        Dot "."
+        Ident "length"
+      ArgList
+        LParen "("
+        RParen ")"
+  SayStmt
+    SayKw "say"
+    CallExpr
+      FieldExpr
+        CallExpr
+          FieldExpr
+            NameRef
+              Ident "config"
+            Dot "."
+            Ident "keys"
+          ArgList
+            LParen "("
+            RParen ")"
+        Dot "."
+        Ident "sort"
+      ArgList
+        LParen "("
+        RParen ")"
+  LetStmt
+    LetKw "let"
+    Ident "chained"
+    Assign "="
+    CallExpr
+      FieldExpr
+        IndexExpr
+          FieldExpr
+            CallExpr
+              NameRef
+                Ident "f"
+              ArgList
+                LParen "("
+                Literal
+                  IntLit "1"
+                Comma ","
+                Literal
+                  IntLit "2"
+                RParen ")"
+            Dot "."
+            Ident "g"
+          LBracket "["
+          Literal
+            IntLit "3"
+          RBracket "]"
+        Dot "."
+        Ident "h"
+      ArgList
+        LParen "("
+        Literal
+          StrLit "\"x\""
+        RParen ")"
+  LetStmt
+    LetKw "let"
+    Ident "spread"
+    Assign "="
+    CallExpr
+      NameRef
+        Ident "f"
+      ArgList
+        LParen "("
+        Literal
+          IntLit "1"
+        Comma ","
+        Literal
+          IntLit "2"
+        Comma ","
+        RParen ")"

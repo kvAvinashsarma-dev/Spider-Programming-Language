@@ -1,0 +1,21 @@
+SourceFile
+  LetStmt
+    LetKw "let"
+    Ident "x"
+    Assign "="
+  SayStmt
+    SayKw "say"
+    Literal
+      StrLit "\"still parsing after the error above\""
+  LetStmt
+    LetKw "let"
+    Ident "s"
+    Assign "="
+    Literal
+      StrLit "\"unterminated"
+  SayStmt
+    SayKw "say"
+    BinaryExpr
+      Literal
+        IntLit "1"
+      Plus "+"

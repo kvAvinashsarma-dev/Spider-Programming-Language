@@ -1,0 +1,3 @@
+E0110 1:8 expected a value here (like a number, some text, or a name)
+E0003 3:9 this text never ends — add a closing quote "
+E0110 4:8 expected a value here (like a number, some text, or a name)

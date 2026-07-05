@@ -1,0 +1,162 @@
+SourceFile
+  DocComment "## Greets one person by name."
+  FnDecl
+    FnKw "fn"
+    Ident "greet"
+    ParamList
+      LParen "("
+      Param
+        Ident "name"
+        Colon ":"
+        TypeRef
+          Ident "Text"
+      RParen ")"
+    Block
+      SayStmt
+        SayKw "say"
+        Literal
+          StrLit "\"Hello, {name}!\""
+  FnDecl
+    FnKw "fn"
+    Ident "area"
+    ParamList
+      LParen "("
+      Param
+        Ident "width"
+        Colon ":"
+        TypeRef
+          Ident "Float"
+      Comma ","
+      Param
+        Ident "height"
+        Colon ":"
+        TypeRef
+          Ident "Float"
+      RParen ")"
+    RetType
+      Arrow "->"
+      TypeRef
+        Ident "Float"
+    Block
+      ReturnStmt
+        ReturnKw "return"
+        BinaryExpr
+          NameRef
+            Ident "width"
+          Star "*"
+          NameRef
+            Ident "height"
+  FnDecl
+    PublicKw "public"
+    FnKw "fn"
+    Ident "total"
+    ParamList
+      LParen "("
+      Param
+        Ident "prices"
+        Colon ":"
+        TypeRef
+          Ident "List"
+          OfKw "of"
+          TypeRef
+            Ident "Float"
+      RParen ")"
+    RetType
+      Arrow "->"
+      TypeRef
+        Ident "Float"
+    Block
+      DocComment "## Adds up every price in the list."
+      VarStmt
+        VarKw "var"
+        Ident "sum"
+        Assign "="
+        Literal
+          FloatLit "0.0"
+      ForStmt
+        ForKw "for"
+        Ident "price"
+        InKw "in"
+        NameRef
+          Ident "prices"
+        Block
+          AssignStmt
+            NameRef
+              Ident "sum"
+            PlusAssign "+="
+            NameRef
+              Ident "price"
+      ReturnStmt
+        ReturnKw "return"
+        NameRef
+          Ident "sum"
+  FnDecl
+    FnKw "fn"
+    Ident "largest"
+    ParamList
+      LParen "("
+      Param
+        Ident "items"
+        Colon ":"
+        TypeRef
+          Ident "List"
+          OfKw "of"
+          TypeRef
+            Ident "T"
+      RParen ")"
+    RetType
+      Arrow "->"
+      TypeRef
+        Ident "Maybe"
+        OfKw "of"
+        TypeRef
+          Ident "T"
+    WhereClause
+      WhereKw "where"
+      Ident "T"
+      IsKw "is"
+      Ident "Comparable"
+    Block
+      ReturnStmt
+        ReturnKw "return"
+        CallExpr
+          FieldExpr
+            NameRef
+              Ident "items"
+            Dot "."
+            Ident "first"
+          ArgList
+            LParen "("
+            RParen ")"
+  FnDecl
+    FnKw "fn"
+    Ident "main"
+    ParamList
+      LParen "("
+      RParen ")"
+    Block
+      ExprStmt
+        CallExpr
+          NameRef
+            Ident "greet"
+          ArgList
+            LParen "("
+            Literal
+              StrLit "\"Ada\""
+            RParen ")"
+      SayStmt
+        SayKw "say"
+        CallExpr
+          NameRef
+            Ident "total"
+          ArgList
+            LParen "("
+            ListExpr
+              LBracket "["
+              Literal
+                FloatLit "1.5"
+              Comma ","
+              Literal
+                FloatLit "2.5"
+              RBracket "]"
+            RParen ")"

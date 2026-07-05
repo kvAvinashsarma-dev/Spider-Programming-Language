@@ -1,0 +1,28 @@
+SourceFile
+  Comment "# A leading comment stays put."
+  LetStmt
+    LetKw "let"
+    Ident "x"
+    Assign "="
+    Literal
+      IntLit "1"
+    Comment "# a trailing comment"
+  Comment "# A comment between statements."
+  LetStmt
+    LetKw "let"
+    Ident "y"
+    Assign "="
+    Literal
+      IntLit "2"
+  FnDecl
+    FnKw "fn"
+    Ident "f"
+    ParamList
+      LParen "("
+      RParen ")"
+    Block
+      Comment "# a comment inside a block"
+      ReturnStmt
+        ReturnKw "return"
+        Literal
+          IntLit "1"

@@ -1,0 +1,47 @@
+SourceFile
+  UseDecl
+    UseKw "use"
+    Ident "math"
+  UseDecl
+    UseKw "use"
+    Ident "net"
+    Dot "."
+    Ident "http"
+  UseDecl
+    UseKw "use"
+    Ident "my_project"
+    Dot "."
+    Ident "billing"
+    Dot "."
+    Ident "invoices"
+  SayStmt
+    SayKw "say"
+    CallExpr
+      FieldExpr
+        NameRef
+          Ident "math"
+        Dot "."
+        Ident "sqrt"
+      ArgList
+        LParen "("
+        Literal
+          FloatLit "2.0"
+        RParen ")"
+  TestDecl
+    TestKw "test"
+    StrLit "\"adding works\""
+    Block
+      LetStmt
+        LetKw "let"
+        Ident "result"
+        Assign "="
+        BinaryExpr
+          Literal
+            IntLit "1"
+          Plus "+"
+          Literal
+            IntLit "1"
+      SayStmt
+        SayKw "say"
+        NameRef
+          Ident "result"

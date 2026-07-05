@@ -1,0 +1,137 @@
+SourceFile
+  RecordDecl
+    RecordKw "record"
+    Ident "Point"
+    Block
+      FieldDecl
+        Ident "x"
+        Colon ":"
+        TypeRef
+          Ident "Float"
+      FieldDecl
+        Ident "y"
+        Colon ":"
+        TypeRef
+          Ident "Float"
+  ChoiceDecl
+    ChoiceKw "choice"
+    Ident "Shape"
+    Block
+      VariantDecl
+        Ident "Circle"
+        LParen "("
+        Param
+          Ident "radius"
+          Colon ":"
+          TypeRef
+            Ident "Float"
+        RParen ")"
+      VariantDecl
+        Ident "Rect"
+        LParen "("
+        Param
+          Ident "width"
+          Colon ":"
+          TypeRef
+            Ident "Float"
+        Comma ","
+        Param
+          Ident "height"
+          Colon ":"
+          TypeRef
+            Ident "Float"
+        RParen ")"
+      VariantDecl
+        Ident "Dot"
+  ShapeDecl
+    ShapeKw "shape"
+    Ident "Drawable"
+    Block
+      FnSig
+        FnKw "fn"
+        Ident "draw"
+        ParamList
+          LParen "("
+          Param
+            Ident "self"
+          Comma ","
+          Param
+            Ident "canvas"
+            Colon ":"
+            TypeRef
+              Ident "Canvas"
+          RParen ")"
+      FnSig
+        FnKw "fn"
+        Ident "area"
+        ParamList
+          LParen "("
+          Param
+            Ident "self"
+          RParen ")"
+        RetType
+          Arrow "->"
+          TypeRef
+            Ident "Float"
+  FnDecl
+    FnKw "fn"
+    Ident "area"
+    ParamList
+      LParen "("
+      Param
+        Ident "figure"
+        Colon ":"
+        TypeRef
+          Ident "Shape"
+      RParen ")"
+    RetType
+      Arrow "->"
+      TypeRef
+        Ident "Float"
+    Block
+      MatchStmt
+        MatchKw "match"
+        NameRef
+          Ident "figure"
+        Block
+          MatchArm
+            Pattern
+              Ident "Circle"
+              LParen "("
+              Pattern
+                Ident "r"
+              RParen ")"
+            Arrow "->"
+            BinaryExpr
+              BinaryExpr
+                Literal
+                  FloatLit "3.14159"
+                Star "*"
+                NameRef
+                  Ident "r"
+              Star "*"
+              NameRef
+                Ident "r"
+          MatchArm
+            Pattern
+              Ident "Rect"
+              LParen "("
+              Pattern
+                Ident "w"
+              Comma ","
+              Pattern
+                Ident "h"
+              RParen ")"
+            Arrow "->"
+            BinaryExpr
+              NameRef
+                Ident "w"
+              Star "*"
+              NameRef
+                Ident "h"
+          MatchArm
+            Pattern
+              Ident "Dot"
+            Arrow "->"
+            Literal
+              FloatLit "0.0"

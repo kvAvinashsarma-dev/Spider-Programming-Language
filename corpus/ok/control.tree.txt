@@ -1,0 +1,115 @@
+SourceFile
+  LetStmt
+    LetKw "let"
+    Ident "age"
+    Assign "="
+    Literal
+      IntLit "12"
+  IfStmt
+    IfKw "if"
+    BinaryExpr
+      NameRef
+        Ident "age"
+      GtEq ">="
+      Literal
+        IntLit "13"
+    Block
+      SayStmt
+        SayKw "say"
+        Literal
+          StrLit "\"Teenager or older\""
+    ElseClause
+      ElseKw "else"
+      IfStmt
+        IfKw "if"
+        BinaryExpr
+          NameRef
+            Ident "age"
+          GtEq ">="
+          Literal
+            IntLit "3"
+        Block
+          SayStmt
+            SayKw "say"
+            Literal
+              StrLit "\"Kid\""
+        ElseClause
+          ElseKw "else"
+          Block
+            SayStmt
+              SayKw "say"
+              Literal
+                StrLit "\"Toddler\""
+  ForStmt
+    ForKw "for"
+    Ident "i"
+    InKw "in"
+    RangeExpr
+      Literal
+        IntLit "1"
+      ToKw "to"
+      Literal
+        IntLit "10"
+    Block
+      SayStmt
+        SayKw "say"
+        NameRef
+          Ident "i"
+  RepeatStmt
+    RepeatKw "repeat"
+    Literal
+      IntLit "3"
+    TimesKw "times"
+    Block
+      SayStmt
+        SayKw "say"
+        Literal
+          StrLit "\"Hip hip hooray!\""
+  VarStmt
+    VarKw "var"
+    Ident "lives"
+    Assign "="
+    Literal
+      IntLit "3"
+  WhileStmt
+    WhileKw "while"
+    BinaryExpr
+      NameRef
+        Ident "lives"
+      Gt ">"
+      Literal
+        IntLit "0"
+    Block
+      AssignStmt
+        NameRef
+          Ident "lives"
+        MinusAssign "-="
+        Literal
+          IntLit "1"
+  IfStmt
+    IfKw "if"
+    BinaryExpr
+      BinaryExpr
+        BinaryExpr
+          NameRef
+            Ident "age"
+          Gt ">"
+          Literal
+            IntLit "3"
+        AndKw "and"
+        BinaryExpr
+          NameRef
+            Ident "age"
+          Lt "<"
+          Literal
+            IntLit "13"
+      OrKw "or"
+      UnaryExpr
+        NotKw "not"
+        Literal
+          FalseKw "false"
+    Block
+      SayStmt
+        SayKw "say"
+        Literal
+          StrLit "\"boolean logic reads like a sentence\""

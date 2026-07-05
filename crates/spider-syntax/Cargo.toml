@@ -1,0 +1,10 @@
+[package]
+name = "spider-syntax"
+description = "Lexer, lossless concrete syntax tree, and error-tolerant parser for the Spider language"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+# Intentionally empty. The syntax crate has zero external dependencies so the
+# toolchain builds offline and the supply chain stays auditable (SRS NFR-1/2).

@@ -1,0 +1,9 @@
+[package]
+name = "spider-fmt"
+description = "The canonical Spider formatter. Zero configuration, by design."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+spider-syntax = { path = "../spider-syntax" }

@@ -1,0 +1,19 @@
+SourceFile
+  IfStmt
+    IfKw "if"
+    Literal
+      TrueKw "true"
+    Block
+  SayStmt
+    SayKw "say"
+    Literal
+      StrLit "\"this line was not indented\""
+  RepeatStmt
+    RepeatKw "repeat"
+    Literal
+      IntLit "3"
+    Block
+      SayStmt
+        SayKw "say"
+        Literal
+          StrLit "\"hi\""

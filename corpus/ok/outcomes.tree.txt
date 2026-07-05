@@ -1,0 +1,109 @@
+SourceFile
+  FnDecl
+    FnKw "fn"
+    Ident "load"
+    ParamList
+      LParen "("
+      RParen ")"
+    RetType
+      Arrow "->"
+      TypeRef
+        Ident "Outcome"
+        OfKw "of"
+        TypeRef
+          Ident "Settings"
+    Block
+      LetStmt
+        LetKw "let"
+        Ident "settings"
+        Assign "="
+        TryExpr
+          TryKw "try"
+          CallExpr
+            NameRef
+              Ident "read_settings"
+            ArgList
+              LParen "("
+              Literal
+                StrLit "\"app.cfg\""
+              RParen ")"
+      ReturnStmt
+        ReturnKw "return"
+        CallExpr
+          NameRef
+            Ident "Ok"
+          ArgList
+            LParen "("
+            NameRef
+              Ident "settings"
+            RParen ")"
+  FnDecl
+    FnKw "fn"
+    Ident "main"
+    ParamList
+      LParen "("
+      RParen ")"
+    Block
+      MatchStmt
+        MatchKw "match"
+        CallExpr
+          NameRef
+            Ident "read_settings"
+          ArgList
+            LParen "("
+            Literal
+              StrLit "\"app.cfg\""
+            RParen ")"
+        Block
+          MatchArm
+            Pattern
+              Ident "Ok"
+              LParen "("
+              Pattern
+                Ident "settings"
+              RParen ")"
+            Arrow "->"
+            CallExpr
+              NameRef
+                Ident "apply"
+              ArgList
+                LParen "("
+                NameRef
+                  Ident "settings"
+                RParen ")"
+          MatchArm
+            Pattern
+              Ident "Fail"
+              LParen "("
+              Pattern
+                Ident "problem"
+              RParen ")"
+            Arrow "->"
+            SayKw "say"
+            Literal
+              StrLit "\"Could not load settings: {problem}\""
+      LetStmt
+        LetKw "let"
+        Ident "settings"
+        Assign "="
+        TryExpr
+          TryKw "try"
+          CallExpr
+            NameRef
+              Ident "read_settings"
+            ArgList
+              LParen "("
+              Literal
+                StrLit "\"app.cfg\""
+              RParen ")"
+          ElseKw "else"
+          CallExpr
+            NameRef
+              Ident "default_settings"
+            ArgList
+              LParen "("
+              RParen ")"
+      SayStmt
+        SayKw "say"
+        NameRef
+          Ident "settings"

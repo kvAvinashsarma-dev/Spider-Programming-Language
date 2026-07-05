@@ -1,0 +1,14 @@
+[package]
+name = "spider-cli"
+description = "The spider command-line tool"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "spider"
+path = "src/main.rs"
+
+[dependencies]
+spider-syntax = { path = "../spider-syntax" }
+spider-fmt = { path = "../spider-fmt" }

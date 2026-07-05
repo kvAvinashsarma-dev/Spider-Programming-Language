@@ -1,0 +1,41 @@
+SourceFile
+  DoTogetherStmt
+    DoKw "do"
+    TogetherKw "together"
+    Block
+      LetStmt
+        LetKw "let"
+        Ident "weather"
+        Assign "="
+        CallExpr
+          NameRef
+            Ident "fetch_weather"
+          ArgList
+            LParen "("
+            Literal
+              StrLit "\"Tokyo\""
+            RParen ")"
+      LetStmt
+        LetKw "let"
+        Ident "news"
+        Assign "="
+        CallExpr
+          NameRef
+            Ident "fetch_headlines"
+          ArgList
+            LParen "("
+            RParen ")"
+  SpawnStmt
+    SpawnKw "spawn"
+    CallExpr
+      NameRef
+        Ident "worker"
+      ArgList
+        LParen "("
+        NameRef
+          Ident "jobs"
+        RParen ")"
+  SayStmt
+    SayKw "say"
+    Literal
+      StrLit "\"started\""

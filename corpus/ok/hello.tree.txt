@@ -1,0 +1,17 @@
+SourceFile
+  SayStmt
+    SayKw "say"
+    Literal
+      StrLit "\"Hello, world!\""
+  LetStmt
+    LetKw "let"
+    Ident "name"
+    Assign "="
+    AskExpr
+      AskKw "ask"
+      Literal
+        StrLit "\"What is your name?\""
+  SayStmt
+    SayKw "say"
+    Literal
+      StrLit "\"Welcome, {name}!\""

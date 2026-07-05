@@ -1,0 +1,10 @@
+let pi = 3.14159
+var score = 0
+score = score + 10
+score += 5
+let title: Text = "Spider"
+let scores: List of Int = [90, 85, 77]
+let ages: Map of Text to Int = {"Ada": 12, "Lin": 11}
+let big = 1_000_000
+let tiny = 2.5e-3
+let negative = -42
