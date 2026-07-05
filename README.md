@@ -95,6 +95,12 @@ and a list of open design questions with recommendations
 ([LDD §18](docs/0002-language-design-document.md)). Implementation of
 Milestone M1 begins only after those decisions are ratified.
 
+## Credits
+
+Designed and built by **Avinash** ([@kvAvinashsarma-dev](https://github.com/kvAvinashsarma-dev))
+in collaboration with **Claude** (Anthropic) as co-author — specification,
+compiler, Silk VM, toolchain, and documentation.
+
 ---
 
 *Spider — spin something.*
