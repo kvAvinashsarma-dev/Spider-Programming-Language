@@ -5,11 +5,13 @@
 //! states the checker makes unreachable surface as `internal` errors so a
 //! toolchain bug can never masquerade as a user mistake.
 
-use crate::compile::{BinOp, Instr, Program, MODULE_MATH, MODULE_RANDOM};
+use crate::compile::{
+    BinOp, Instr, Program, MODULE_BUILTIN, MODULE_FILES, MODULE_MATH, MODULE_RANDOM,
+};
 use crate::value::{display, value_cmp, value_eq, Iter, RecordVal, Value, VariantVal};
 use std::cell::RefCell;
 use std::cmp::Ordering;
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use std::rc::Rc;
 
 #[derive(Debug, Clone)]
@@ -106,6 +108,9 @@ impl Frame {
 
 pub struct Vm<'a> {
     pub globals: Vec<Value>,
+    /// Runtime capability grants — the second enforcement layer (SRS FR-21).
+    /// The checker's E0244 is advisory for humans; this one is law.
+    pub allowed: HashSet<String>,
     io: &'a mut dyn Io,
     rng: u64,
     depth: u32,
@@ -115,9 +120,26 @@ impl<'a> Vm<'a> {
     pub fn new(io: &'a mut dyn Io) -> Vm<'a> {
         Vm {
             globals: Vec::new(),
+            allowed: HashSet::new(),
             io,
             rng: 0x9E37_79B9_7F4A_7C15,
             depth: 0,
+        }
+    }
+
+    /// Runs one `test "…"` proto (after `run_entry` has done setup).
+    pub fn call_proto(&mut self, p: &Program, idx: u32) -> Result<Value, RuntimeError> {
+        self.call(p, idx, Vec::new())
+    }
+
+    fn require_cap(&self, cap: &str, what: &str) -> Result<(), RuntimeError> {
+        if self.allowed.contains(cap) {
+            Ok(())
+        } else {
+            Err(err(
+                "E0310",
+                format!("{what} needs the `{cap}` capability, which this program was not given"),
+            ))
         }
     }
 
@@ -513,9 +535,86 @@ impl<'a> Vm<'a> {
             (MODULE_RANDOM, "float") => {
                 Ok(Value::Float((self.next_rng() >> 11) as f64 / (1u64 << 53) as f64))
             }
+            (MODULE_FILES, _) => self.files_call(name, args),
+            (MODULE_BUILTIN, "expect") => {
+                let (Some(actual), Some(expected)) = (args.first(), args.get(1)) else {
+                    return Err(internal("expect needs two values"));
+                };
+                if value_eq(actual, expected) {
+                    Ok(Value::Unit)
+                } else {
+                    Err(err(
+                        "E0311",
+                        format!(
+                            "expected {}, but got {}",
+                            display(expected, true),
+                            display(actual, true)
+                        ),
+                    ))
+                }
+            }
             _ => Err(err(
                 "E0306",
-                format!("this module has no member named `{name}` (M3 runs math and random)"),
+                format!("this module has no member named `{name}` in this Spider version"),
+            )),
+        }
+    }
+
+    fn files_call(&mut self, name: &str, args: Vec<Value>) -> Result<Value, RuntimeError> {
+        self.require_cap("fs", &format!("`files.{name}`"))?;
+        let path_arg = |i: usize| -> Result<String, RuntimeError> {
+            match args.get(i) {
+                Some(Value::Text(s)) => Ok(s.as_str().to_string()),
+                _ => Err(internal("files paths must be Text")),
+            }
+        };
+        let fail = |msg: String| Value::variant("Fail", vec![Value::text(msg)]);
+        match name {
+            "read_text" => {
+                let path = path_arg(0)?;
+                Ok(match std::fs::read_to_string(&path) {
+                    Ok(text) => Value::variant("Ok", vec![Value::text(text)]),
+                    Err(e) => fail(format!("cannot read {path}: {e}")),
+                })
+            }
+            "write_text" => {
+                let path = path_arg(0)?;
+                let content = match args.get(1) {
+                    Some(Value::Text(s)) => s.as_str().to_string(),
+                    Some(other) => display(other, false),
+                    None => String::new(),
+                };
+                Ok(match std::fs::write(&path, content) {
+                    Ok(()) => Value::variant("Ok", vec![Value::Bool(true)]),
+                    Err(e) => fail(format!("cannot write {path}: {e}")),
+                })
+            }
+            "exists" => {
+                let path = path_arg(0)?;
+                Ok(Value::Bool(std::path::Path::new(&path).exists()))
+            }
+            "list" => {
+                let path = path_arg(0)?;
+                Ok(match std::fs::read_dir(&path) {
+                    Ok(entries) => {
+                        let mut names: Vec<String> = entries
+                            .filter_map(|e| e.ok())
+                            .filter_map(|e| e.file_name().into_string().ok())
+                            .collect();
+                        names.sort();
+                        Value::variant(
+                            "Ok",
+                            vec![Value::List(Rc::new(
+                                names.into_iter().map(Value::text).collect(),
+                            ))],
+                        )
+                    }
+                    Err(e) => fail(format!("cannot list {path}: {e}")),
+                })
+            }
+            other => Err(err(
+                "E0306",
+                format!("`files` has no member named `{other}`"),
             )),
         }
     }

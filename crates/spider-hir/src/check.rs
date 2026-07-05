@@ -14,6 +14,7 @@
 //!   return value.
 
 use crate::span::SpanMap;
+use crate::stdlib::{self, CapPolicy};
 use crate::ty::{collect_rigids, subst_rigids, Ty, Unifier};
 use spider_syntax::{Diagnostic, Node, Parse, SyntaxKind as K};
 use std::collections::{HashMap, HashSet};
@@ -37,7 +38,13 @@ struct Local {
     span: (usize, usize),
 }
 
+/// Checks with no capability policy — embedding and corpus tests.
+/// The CLI always calls `check_parse_caps` with a real policy.
 pub fn check_parse(parse: &Parse) -> Vec<Diagnostic> {
+    check_parse_caps(parse, &CapPolicy::AllowAll)
+}
+
+pub fn check_parse_caps(parse: &Parse, policy: &CapPolicy) -> Vec<Diagnostic> {
     let mut c = Checker {
         spans: SpanMap::build(&parse.root),
         uni: Unifier::new(),
@@ -52,6 +59,7 @@ pub fn check_parse(parse: &Parse) -> Vec<Diagnostic> {
         current_ret: None,
         current_rigids: HashSet::new(),
         span_override: None,
+        cap_policy: policy.clone(),
     };
     c.collect_names(&parse.root);
     c.collect_signatures(&parse.root);
@@ -77,6 +85,7 @@ struct Checker {
     /// While checking code parsed out of a `{…}` hole, all diagnostics land
     /// on the enclosing string literal's span.
     span_override: Option<(usize, usize)>,
+    cap_policy: CapPolicy,
 }
 
 impl Checker {
@@ -222,6 +231,16 @@ impl Checker {
                             );
                             let span = self.spans.of(n);
                             self.warn(span, "W0002", msg);
+                        }
+                        // Safe Mode (SRS FR-21): a capability-gated module may
+                        // only be imported if the capability is granted.
+                        if let Some(cap) = stdlib::module_capability(first) {
+                            if !self.cap_policy.allows(cap) {
+                                let msg = format!(
+                                    "using `{first}` needs the `{cap}` capability, which this program was not given — add \"{cap}\" to `allow` in web.toml, or run with `--allow {cap}`"
+                                );
+                                self.err(n, "E0244", msg);
+                            }
                         }
                         self.modules.insert(last.clone());
                     }
@@ -1227,6 +1246,25 @@ impl Checker {
                 if let Some(sig) = self.fns.get(&name).cloned() {
                     return self.check_call_against(&name, &sig, &args, n);
                 }
+                // The global builtin `expect(actual, expected)`.
+                if name == "expect" {
+                    if args.len() != 2 {
+                        let msg =
+                            format!("`expect` takes 2 arguments (actual, expected), but got {}", args.len());
+                        self.err(n, "E0216", msg);
+                    }
+                    let a = args.first().map(|x| self.ty_of(x)).unwrap_or(Ty::Any);
+                    let b = args.get(1).map(|x| self.ty_of(x)).unwrap_or(Ty::Any);
+                    if !self.uni.unify(&a, &b) {
+                        let msg = format!(
+                            "`expect` compares two values of the same type, but these are {} and {}",
+                            self.show(&a),
+                            self.show(&b)
+                        );
+                        self.err(n, "E0211", msg);
+                    }
+                    return Ty::Unit;
+                }
             }
         }
 
@@ -1320,7 +1358,7 @@ impl Checker {
             .map(|t| t.text.clone())
             .unwrap_or_default();
 
-        // Module call: math.sqrt(2.0) — unchecked until the stdlib is typed (M4).
+        // Module call: typed against the stdlib registry (M4).
         if base.kind == K::NameRef {
             let bname = base
                 .find_token(K::Ident)
@@ -1329,9 +1367,29 @@ impl Checker {
             if self.modules.contains(&bname)
                 && self.scopes.iter().rev().all(|s| !s.contains_key(&bname))
             {
+                if let Some(mf) = stdlib::find_module_fn(&bname, &method) {
+                    let sig = FnSig {
+                        params: mf.params,
+                        ret: mf.ret,
+                    };
+                    let label = format!("{bname}.{method}");
+                    return self.check_call_against(&label, &sig, args, call);
+                }
                 for a in args {
                     self.ty_of(a);
                 }
+                let msg = if stdlib::module_is_implemented(&bname) {
+                    let members = stdlib::module_member_names(&bname);
+                    format!(
+                        "`{bname}` has no member named `{method}`{}",
+                        self.suggestion(&method, &members)
+                    )
+                } else {
+                    format!(
+                        "the `{bname}` module has no members in this Spider version yet"
+                    )
+                };
+                self.err(callee, "E0306", msg);
                 return Ty::Any;
             }
         }
@@ -1344,7 +1402,7 @@ impl Checker {
             }
             return Ty::Any;
         }
-        match method_sig(&resolved, &method) {
+        match stdlib::method_sig(&resolved, &method) {
             Some((params, ret)) => {
                 let sig = FnSig { params, ret };
                 self.check_call_against(&method, &sig, args, call)
@@ -1381,6 +1439,21 @@ impl Checker {
             if self.modules.contains(&bname)
                 && self.scopes.iter().rev().all(|s| !s.contains_key(&bname))
             {
+                if let Some(mc) = stdlib::find_module_const(&bname, &field) {
+                    return mc.ty;
+                }
+                let msg = if stdlib::find_module_fn(&bname, &field).is_some() {
+                    format!("`{bname}.{field}` is a function — call it with (…)")
+                } else if stdlib::module_is_implemented(&bname) {
+                    let members = stdlib::module_member_names(&bname);
+                    format!(
+                        "`{bname}` has no member named `{field}`{}",
+                        self.suggestion(&field, &members)
+                    )
+                } else {
+                    format!("the `{bname}` module has no members in this Spider version yet")
+                };
+                self.err(n, "E0306", msg);
                 return Ty::Any;
             }
         }
@@ -1754,47 +1827,6 @@ fn expr_children(n: &Node) -> Vec<&Rc<Node>> {
         .into_iter()
         .filter(|c| c.kind.is_expr())
         .collect()
-}
-
-/// Built-in methods per type. The typed stdlib proper arrives in M4; this
-/// table covers the teaching core.
-fn method_sig(base: &Ty, name: &str) -> Option<(Vec<Ty>, Ty)> {
-    match base {
-        Ty::Int => match name {
-            "to_float" => Some((vec![], Ty::Float)),
-            "abs" => Some((vec![], Ty::Int)),
-            _ => None,
-        },
-        Ty::Float => match name {
-            "to_int" => Some((vec![], Ty::Int)),
-            "round" | "floor" => Some((vec![], Ty::Int)),
-            "abs" => Some((vec![], Ty::Float)),
-            _ => None,
-        },
-        Ty::Text => match name {
-            "length" => Some((vec![], Ty::Int)),
-            "upper" | "lower" | "trim" => Some((vec![], Ty::Text)),
-            "contains" => Some((vec![Ty::Text], Ty::Bool)),
-            "split" => Some((vec![Ty::Text], Ty::List(Box::new(Ty::Text)))),
-            _ => None,
-        },
-        Ty::List(t) => match name {
-            "length" => Some((vec![], Ty::Int)),
-            "first" | "last" => Some((vec![], Ty::Maybe(t.clone()))),
-            "sort" | "reverse" => Some((vec![], Ty::List(t.clone()))),
-            "push" => Some((vec![(**t).clone()], Ty::Unit)),
-            "contains" => Some((vec![(**t).clone()], Ty::Bool)),
-            _ => None,
-        },
-        Ty::Map(k, v) => match name {
-            "length" => Some((vec![], Ty::Int)),
-            "keys" => Some((vec![], Ty::List(k.clone()))),
-            "values" => Some((vec![], Ty::List(v.clone()))),
-            "has" => Some((vec![(**k).clone()], Ty::Bool)),
-            _ => None,
-        },
-        _ => None,
-    }
 }
 
 fn levenshtein(a: &str, b: &str) -> usize {

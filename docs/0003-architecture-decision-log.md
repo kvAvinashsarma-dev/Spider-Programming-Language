@@ -126,6 +126,21 @@ work (holes cannot contain text literals until then). (6) Bare `try` on a
 under `spider test` (M4), never under `spider run`. (8) Concurrency
 constructs run sequentially until M7 and the checker says so (W0003).
 
+## ADR-014 — The stdlib registry and the two-layer capability model
+**Status:** Accepted (2026-07-05) · **Refs:** M4 notes (doc 0007), SRS FR-21
+(1) The standard library is described once, in `spider_hir::stdlib`:
+signature + documentation + capability per entry. Checker typing, VM
+dispatch, and the doc-coverage gate all read the same table — drift is
+structurally impossible. (2) Capabilities are enforced twice: at check time
+(E0244 on `use`, human-friendly, points at the import) and at runtime in
+the VM (E0310 at the operation, cannot be bypassed by embedding or a
+permissive check). (3) Scripts and the REPL default to zero capabilities
+(Safe Mode); grants come from the nearest `web.toml` or explicit
+`--allow <cap>` flags — never implicitly. (4) `say`/`ask` are language-level
+and capability-free. (5) `files` failures are Outcome values, not panics:
+a missing file is expected failure per LDD §8.1. (6) Tests run one fresh VM
+each; inter-test state sharing is impossible by construction.
+
 ---
 
 *Add new entries below; never edit accepted entries — supersede them.*

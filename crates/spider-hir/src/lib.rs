@@ -7,10 +7,14 @@
 //! murky ones.
 
 pub mod check;
+pub mod manifest;
 pub mod span;
+pub mod stdlib;
 pub mod ty;
 
-pub use check::check_parse;
+pub use check::{check_parse, check_parse_caps};
+pub use manifest::{parse_manifest, Manifest};
+pub use stdlib::CapPolicy;
 pub use ty::{Ty, Unifier};
 
 use spider_syntax::Diagnostic;

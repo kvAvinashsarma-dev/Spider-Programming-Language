@@ -397,6 +397,11 @@ pub fn explain(code: &str) -> Option<Explain> {
             "constraints must be built-in (Comparable, Equatable, Printable) or a declared shape.",
             "check the spelling, or declare a shape with that name.",
         ),
+        "E0244" => (
+            "this module needs a capability the program was not given.",
+            "Spider programs can only touch the outside world (files, network…) with capabilities declared up front — that's what keeps every Spider program and package safe to run.",
+            "add the capability to `allow` in web.toml, or run a script with `--allow fs` (etc.) to grant it for one run.",
+        ),
         "E0243" => (
             "the code inside { } in this text is not a valid expression.",
             "everything between { and } in text is real Spider code whose value gets woven into the text.",
@@ -435,13 +440,23 @@ pub fn explain(code: &str) -> Option<Explain> {
         ),
         "E0306" => (
             "this module has no member with that name (in this Spider version).",
-            "only the `math` and `random` modules run in Milestone M3; the full standard library arrives in M4.",
-            "check the spelling, or wait for the M4 standard library.",
+            "the standard library grows milestone by milestone — right now math, random, and files exist; the message suggests the closest member if there is one.",
+            "check the spelling against the module's members, or check which modules exist yet.",
         ),
         "E0307" => (
             "the program called functions too deeply and stopped.",
             "each unfinished call needs memory; endless recursion would eat it all — Spider stops at 1000 nested calls in this version.",
             "check that the recursion has a base case that is actually reached.",
+        ),
+        "E0310" => (
+            "the program tried to use a capability it was not given, and stopped.",
+            "capabilities are enforced twice: when checking (E0244) and again while running, so no code path can sneak around the declaration.",
+            "grant the capability in web.toml or with --allow, and only if you trust what the program does with it.",
+        ),
+        "E0311" => (
+            "a test expectation failed: the two values were not equal.",
+            "`expect(actual, expected)` is how a test says what must be true; the message shows both values.",
+            "look at which value is wrong — the code being tested, or the expectation itself.",
         ),
         // ----- warnings -----
         "W0001" => (
@@ -476,8 +491,9 @@ pub const ALL_CODES: &[&str] = &[
     "E0170", "E0201", "E0203", "E0204", "E0208", "E0209", "E0210", "E0211", "E0212", "E0213",
     "E0214", "E0215", "E0216", "E0217", "E0218", "E0219", "E0220", "E0221", "E0222", "E0223",
     "E0224", "E0225", "E0226", "E0227", "E0228", "E0229", "E0230", "E0231", "E0232", "E0233",
-    "E0234", "E0235", "E0236", "E0237", "E0240", "E0241", "E0242", "E0243", "E0301", "E0302",
-    "E0303", "E0304", "E0305", "E0306", "E0307", "W0001", "W0002", "W0003",
+    "E0234", "E0235", "E0236", "E0237", "E0240", "E0241", "E0242", "E0243", "E0244", "E0301",
+    "E0302", "E0303", "E0304", "E0305", "E0306", "E0307", "E0310", "E0311", "W0001", "W0002",
+    "W0003",
 ];
 
 #[cfg(test)]

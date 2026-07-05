@@ -4,14 +4,15 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 
-const VERSION: &str = "spider 0.1.0 (Milestone M3 \"Silk\")";
+const VERSION: &str = "spider 0.1.0 (Milestone M4 \"Web-spinning\")";
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let code = match args.first().map(|s| s.as_str()) {
         Some("run") => cmd_run(&args[1..]),
+        Some("test") => cmd_test(&args[1..]),
         Some("new") => cmd_new(&args[1..]),
-        Some("repl") => cmd_repl(),
+        Some("repl") => cmd_repl(&args[1..]),
         Some("fmt") => cmd_fmt(&args[1..]),
         Some("check") => cmd_check(&args[1..]),
         Some("tree") => cmd_tree(&args[1..]),
@@ -42,6 +43,7 @@ fn print_help() {
     println!();
     println!("Commands:");
     println!("  run <file.sp>        check and run a Spider program");
+    println!("  test <path>          run every `test \"…\"` block");
     println!("  repl                 interactive Spider session");
     println!("  new <name>           create a new Spider project");
     println!("  fmt <paths...>       format .sp files in place (--check: report only)");
@@ -51,17 +53,96 @@ fn print_help() {
     println!("  explain <E0123>      explain an error code");
     println!("  --version            show the toolchain version");
     println!();
-    println!("Coming later: build (native, M8), test (M4).");
+    println!("Capabilities (Safe Mode): programs may only touch files/network/etc.");
+    println!("when web.toml allows it, or per run: spider run --allow fs script.sp");
+    println!();
+    println!("Coming later: build (native, M8).");
+}
+
+/// Splits `--allow <cap>` / `--allow cap1,cap2` flags out of an argument
+/// list; validates capability names against the known set.
+fn split_allow(args: &[String]) -> Result<(Vec<String>, std::collections::HashSet<String>), String> {
+    let mut rest = Vec::new();
+    let mut caps = std::collections::HashSet::new();
+    let mut i = 0;
+    while i < args.len() {
+        if args[i] == "--allow" {
+            let Some(list) = args.get(i + 1) else {
+                return Err("--allow needs a capability, like: --allow fs".into());
+            };
+            for cap in list.split(',') {
+                let cap = cap.trim();
+                if !spider_hir::stdlib::KNOWN_CAPABILITIES.contains(&cap) {
+                    return Err(format!(
+                        "`{cap}` is not a capability — the capabilities are: {}",
+                        spider_hir::stdlib::KNOWN_CAPABILITIES.join(", ")
+                    ));
+                }
+                caps.insert(cap.to_string());
+            }
+            i += 2;
+        } else {
+            rest.push(args[i].clone());
+            i += 1;
+        }
+    }
+    Ok((rest, caps))
+}
+
+/// Walks up from the file looking for web.toml; returns its capabilities.
+fn manifest_caps(start: &Path) -> Result<Option<std::collections::HashSet<String>>, String> {
+    let mut dir = if start.is_dir() {
+        Some(start.to_path_buf())
+    } else {
+        start.parent().map(|p| p.to_path_buf())
+    };
+    for _ in 0..16 {
+        let Some(d) = dir else { break };
+        let candidate = d.join("web.toml");
+        if candidate.is_file() {
+            let text = fs::read_to_string(&candidate)
+                .map_err(|e| format!("cannot read {}: {e}", candidate.display()))?;
+            let m = spider_hir::parse_manifest(&text)
+                .map_err(|e| format!("{}: {e}", candidate.display()))?;
+            return Ok(Some(m.capabilities));
+        }
+        dir = d.parent().map(|p| p.to_path_buf());
+    }
+    Ok(None)
+}
+
+/// Manifest capabilities (if a project) plus any `--allow` grants.
+fn effective_caps(
+    file: &Path,
+    allow: &std::collections::HashSet<String>,
+) -> Result<std::collections::HashSet<String>, String> {
+    let mut caps = manifest_caps(file)?.unwrap_or_default();
+    caps.extend(allow.iter().cloned());
+    Ok(caps)
 }
 
 fn cmd_run(args: &[String]) -> i32 {
-    let Some(path) = require_file(args, "run") else {
+    let (rest, allow) = match split_allow(args) {
+        Ok(x) => x,
+        Err(e) => {
+            eprintln!("spider: {e}");
+            return 2;
+        }
+    };
+    let Some(path) = require_file(&rest, "run") else {
         return 2;
     };
     let path = if path.is_dir() {
         path.join("src").join("main.sp")
     } else {
         path
+    };
+    let caps = match effective_caps(&path, &allow) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("spider: {e}");
+            return 2;
+        }
     };
     let src = match read_source(&path) {
         Ok(s) => s,
@@ -71,7 +152,8 @@ fn cmd_run(args: &[String]) -> i32 {
         }
     };
     let file = path.display().to_string();
-    match spider_silk::prepare(&src) {
+    let policy = spider_hir::CapPolicy::Only(caps.clone());
+    match spider_silk::prepare_with(&src, &policy) {
         Ok(prepared) => {
             for w in &prepared.warnings {
                 eprint!("{}", spider_syntax::render(&src, &file, w));
@@ -79,6 +161,7 @@ fn cmd_run(args: &[String]) -> i32 {
             }
             let mut io = spider_silk::ConsoleIo;
             let mut vm = spider_silk::Vm::new(&mut io);
+            vm.allowed = caps;
             match vm.run(&prepared.program) {
                 Ok(_) => 0,
                 Err(e) => {
@@ -101,6 +184,104 @@ fn cmd_run(args: &[String]) -> i32 {
             1
         }
     }
+}
+
+fn cmd_test(args: &[String]) -> i32 {
+    let (rest, allow) = match split_allow(args) {
+        Ok(x) => x,
+        Err(e) => {
+            eprintln!("spider: {e}");
+            return 2;
+        }
+    };
+    let target = rest
+        .first()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."));
+    let mut files = Vec::new();
+    collect_sp_files(&target, &mut files);
+    if files.is_empty() {
+        eprintln!("spider: no .sp files found under {}", target.display());
+        return 2;
+    }
+
+    let (mut passed, mut failed, mut broken) = (0usize, 0usize, 0usize);
+    for file in &files {
+        let src = match read_source(file) {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("{e}");
+                broken += 1;
+                continue;
+            }
+        };
+        let caps = match effective_caps(file, &allow) {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("spider: {e}");
+                broken += 1;
+                continue;
+            }
+        };
+        let policy = spider_hir::CapPolicy::Only(caps.clone());
+        let prepared = match spider_silk::prepare_with(&src, &policy) {
+            Ok(p) => p,
+            Err(spider_silk::PrepareError::Diagnostics(diags)) => {
+                eprintln!("{}: {} problem(s) — its tests cannot run:", file.display(), diags.len());
+                if let Some(d) = diags.first() {
+                    eprint!("{}", spider_syntax::render(&src, &file.display().to_string(), d));
+                }
+                broken += 1;
+                continue;
+            }
+            Err(spider_silk::PrepareError::Internal(m)) => {
+                eprintln!("internal Spider error: {m}");
+                broken += 1;
+                continue;
+            }
+        };
+        if prepared.program.tests.is_empty() {
+            continue;
+        }
+        println!("{}:", file.display());
+        for (name, proto) in &prepared.program.tests {
+            // Fresh VM per test: tests can never depend on each other.
+            let mut io = spider_silk::CaptureIo::default();
+            let mut vm = spider_silk::Vm::new(&mut io);
+            vm.allowed = caps.clone();
+            let setup = vm.run_entry(&prepared.program);
+            let result = setup.and_then(|_| vm.call_proto(&prepared.program, *proto));
+            match result {
+                Ok(_) => {
+                    println!("  test \"{name}\" ... ok");
+                    passed += 1;
+                }
+                Err(e) => {
+                    println!("  test \"{name}\" ... FAILED");
+                    if !io.out.is_empty() {
+                        for line in io.out.lines() {
+                            println!("      | {line}");
+                        }
+                    }
+                    print!("{}", indent_lines(&spider_silk::render_panic(&e), "      "));
+                    failed += 1;
+                }
+            }
+        }
+    }
+    println!();
+    println!("{passed} passed, {failed} failed, {broken} file(s) with problems");
+    if failed > 0 || broken > 0 {
+        1
+    } else {
+        0
+    }
+}
+
+fn indent_lines(text: &str, prefix: &str) -> String {
+    text.lines()
+        .map(|l| format!("{prefix}{l}\n"))
+        .collect::<String>()
 }
 
 fn cmd_new(args: &[String]) -> i32 {
@@ -145,12 +326,25 @@ fn cmd_new(args: &[String]) -> i32 {
     0
 }
 
-fn cmd_repl() -> i32 {
+fn cmd_repl(args: &[String]) -> i32 {
     use std::io::{BufRead, Write};
+    let (_, allow) = match split_allow(args) {
+        Ok(x) => x,
+        Err(e) => {
+            eprintln!("spider: {e}");
+            return 2;
+        }
+    };
     println!("{VERSION}");
     println!("Type Spider code. Finish a block with an empty line. `exit` leaves.");
+    if !allow.is_empty() {
+        let mut list: Vec<&str> = allow.iter().map(|s| s.as_str()).collect();
+        list.sort();
+        println!("Capabilities granted this session: {}", list.join(", "));
+    }
     let stdin = std::io::stdin();
     let mut session = spider_silk::Session::new();
+    session.caps = allow;
     let mut io = spider_silk::ConsoleIo;
     loop {
         print!("spider> ");

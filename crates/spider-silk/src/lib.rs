@@ -12,9 +12,11 @@ pub use compile::{compile, Program};
 pub use value::{display, Value};
 pub use vm::{render_panic, CaptureIo, ConsoleIo, Io, RuntimeError, Vm};
 
+use spider_hir::CapPolicy;
 use spider_syntax::{Diagnostic, SyntaxKind as K};
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub enum PrepareError {
     /// Parse or check diagnostics (errors present).
     Diagnostics(Vec<Diagnostic>),
@@ -27,13 +29,19 @@ pub struct Prepared {
     pub warnings: Vec<Diagnostic>,
 }
 
+/// Safe Mode default: no capabilities. Callers with a manifest or `--allow`
+/// flags use `prepare_with`.
 pub fn prepare(src: &str) -> Result<Prepared, PrepareError> {
+    prepare_with(src, &CapPolicy::none())
+}
+
+pub fn prepare_with(src: &str, policy: &CapPolicy) -> Result<Prepared, PrepareError> {
     let src = spider_syntax::strip_bom(src);
     let parse = spider_syntax::parse(src);
     if !parse.diagnostics.is_empty() {
         return Err(PrepareError::Diagnostics(parse.diagnostics));
     }
-    let diags = spider_hir::check_parse(&parse);
+    let diags = spider_hir::check_parse_caps(&parse, policy);
     let (errors, warnings): (Vec<_>, Vec<_>) = diags.into_iter().partition(|d| d.is_error());
     if !errors.is_empty() {
         return Err(PrepareError::Diagnostics(errors));
@@ -43,8 +51,16 @@ pub fn prepare(src: &str) -> Result<Prepared, PrepareError> {
 }
 
 /// Test/tool helper: run a program with captured output and scripted input.
+/// Safe Mode — no capabilities.
 pub fn run_capture(src: &str, inputs: &[&str]) -> Result<String, String> {
-    let prepared = match prepare(src) {
+    run_capture_caps(src, inputs, &[])
+}
+
+/// Like `run_capture`, with capabilities granted to both checker and VM.
+pub fn run_capture_caps(src: &str, inputs: &[&str], caps: &[&str]) -> Result<String, String> {
+    let set: std::collections::HashSet<String> = caps.iter().map(|c| c.to_string()).collect();
+    let policy = CapPolicy::Only(set.clone());
+    let prepared = match prepare_with(src, &policy) {
         Ok(p) => p,
         Err(PrepareError::Diagnostics(d)) => {
             return Err(format!(
@@ -62,6 +78,7 @@ pub fn run_capture(src: &str, inputs: &[&str]) -> Result<String, String> {
         io.inputs.push_back(i.to_string());
     }
     let mut vm = Vm::new(&mut io);
+    vm.allowed = set;
     match vm.run(&prepared.program) {
         Ok(_) => Ok(io.out),
         Err(e) => Err(format!("{} {}", e.code, e.message)),
@@ -85,6 +102,8 @@ pub struct Session {
     bindings: Vec<(String, String)>,
     globals_map: HashMap<String, u16>,
     globals: Vec<Value>,
+    /// Capabilities for both checking and running (Safe Mode: empty).
+    pub caps: std::collections::HashSet<String>,
 }
 
 impl Session {
@@ -94,6 +113,7 @@ impl Session {
             bindings: Vec::new(),
             globals_map: HashMap::new(),
             globals: Vec::new(),
+            caps: std::collections::HashSet::new(),
         }
     }
 
@@ -146,7 +166,8 @@ impl Session {
             // History + entry should always re-parse; entry alone was clean.
             return EvalOutcome::Diagnostics(check_parse.diagnostics);
         }
-        let diags = spider_hir::check_parse(&check_parse);
+        let policy = CapPolicy::Only(self.caps.clone());
+        let diags = spider_hir::check_parse_caps(&check_parse, &policy);
         let errors: Vec<Diagnostic> = diags.into_iter().filter(|d| d.is_error()).collect();
         if !errors.is_empty() {
             return EvalOutcome::Diagnostics(errors);
@@ -169,6 +190,7 @@ impl Session {
 
         let mut vm = Vm::new(io);
         vm.globals = std::mem::take(&mut self.globals);
+        vm.allowed = self.caps.clone();
         let result = vm.run_entry(&program);
         self.globals = std::mem::take(&mut vm.globals);
 
@@ -295,5 +317,83 @@ mod tests {
         assert!(Session::is_incomplete("fn f()\n"));
         assert!(!Session::is_incomplete("say 1\n"));
         assert!(!Session::is_incomplete("if true\n    say 1\n"));
+    }
+
+    // ----- M4: capabilities and the typed stdlib -----
+
+    fn temp_path(name: &str) -> String {
+        let dir = std::env::temp_dir().join("spider-m4-tests");
+        let _ = std::fs::create_dir_all(&dir);
+        dir.join(name).display().to_string().replace('\\', "/")
+    }
+
+    #[test]
+    fn capability_denied_at_check_time() {
+        // Safe Mode default: a script may not even import `files`.
+        let e = run_capture("use files\nsay files.exists(\"x\")\n", &[]).unwrap_err();
+        assert!(e.contains("E0244"), "{e}");
+    }
+
+    #[test]
+    fn capability_enforced_at_runtime_even_if_check_was_permissive() {
+        // Second enforcement layer: check with AllowAll (embedding scenario),
+        // then run a VM that was NOT granted fs.
+        let src = "use files\nsay files.exists(\"x\")\n";
+        let parse = spider_syntax::parse(src);
+        assert!(parse.diagnostics.is_empty());
+        assert!(spider_hir::check_parse(&parse)
+            .iter()
+            .all(|d| !d.is_error()));
+        let program = compile::compile(&parse, None).unwrap();
+        let mut io = CaptureIo::default();
+        let mut vm = Vm::new(&mut io); // vm.allowed stays empty
+        let e = vm.run(&program).unwrap_err();
+        assert_eq!(e.code, "E0310");
+    }
+
+    #[test]
+    fn files_round_trip_with_capability() {
+        let path = temp_path("roundtrip.txt");
+        let src = format!(
+            "use files\nlet ok = try files.write_text(\"{path}\", \"hello from Spider\") else false\nsay ok\nlet text = try files.read_text(\"{path}\") else \"?\"\nsay text\nsay files.exists(\"{path}\")\n"
+        );
+        let out = run_capture_caps(&src, &[], &["fs"]).unwrap();
+        assert_eq!(out, "true\nhello from Spider\ntrue\n");
+    }
+
+    #[test]
+    fn module_calls_are_typed_now() {
+        // Wrong argument type to a stdlib function is a check error.
+        let e = run_capture("use math\nsay math.sqrt(\"nine\")\n", &[]).unwrap_err();
+        assert!(e.contains("E0211"), "{e}");
+        // Unknown member is a check error with a suggestion.
+        let e = run_capture("use math\nsay math.sqirt(9.0)\n", &[]).unwrap_err();
+        assert!(e.contains("E0306") && e.contains("sqrt"), "{e}");
+    }
+
+    #[test]
+    fn expect_and_test_blocks() {
+        let src = "\
+fn double(n: Int) -> Int
+    return n * 2
+
+test \"doubling works\"
+    expect(double(2), 4)
+
+test \"this one fails\"
+    expect(double(2), 5)
+";
+        let prepared = prepare(src).unwrap();
+        assert_eq!(prepared.program.tests.len(), 2);
+
+        let mut io = CaptureIo::default();
+        let mut vm = Vm::new(&mut io);
+        vm.run_entry(&prepared.program).unwrap();
+        assert!(vm.call_proto(&prepared.program, prepared.program.tests[0].1).is_ok());
+        let e = vm
+            .call_proto(&prepared.program, prepared.program.tests[1].1)
+            .unwrap_err();
+        assert_eq!(e.code, "E0311");
+        assert!(e.message.contains('5') && e.message.contains('4'), "{}", e.message);
     }
 }

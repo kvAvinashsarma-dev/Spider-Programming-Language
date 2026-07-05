@@ -82,10 +82,15 @@ pub struct Program {
     pub entry: u32,
     pub main: Option<u32>,
     pub n_globals: u16,
+    /// `test "name"` blocks, in source order — run by `spider test`.
+    pub tests: Vec<(String, u32)>,
 }
 
 pub const MODULE_MATH: u8 = 0;
 pub const MODULE_RANDOM: u8 = 1;
+pub const MODULE_FILES: u8 = 2;
+/// Global builtins (`expect`) route through the module mechanism.
+pub const MODULE_BUILTIN: u8 = 250;
 pub const MODULE_UNKNOWN: u8 = 255;
 
 /// Methods that mutate their receiver; the compiler writes the receiver
@@ -101,6 +106,7 @@ pub fn compile(parse: &Parse, preset_globals: Option<&HashMap<String, u16>>) -> 
         modules: HashMap::new(),
         globals: preset_globals.cloned().unwrap_or_default(),
         protos: Vec::new(),
+        tests: Vec::new(),
     };
     c.collect(&parse.root)?;
     c.compile_all(&parse.root)?;
@@ -121,6 +127,7 @@ pub fn compile(parse: &Parse, preset_globals: Option<&HashMap<String, u16>>) -> 
         entry: 0,
         main,
         n_globals,
+        tests: c.tests,
     })
 }
 
@@ -161,6 +168,7 @@ struct Compiler {
     modules: HashMap<String, u8>,
     globals: HashMap<String, u16>,
     protos: Vec<FnProto>,
+    tests: Vec<(String, u32)>,
 }
 
 impl Compiler {
@@ -193,6 +201,7 @@ impl Compiler {
                         let id = match segs.first().map(|s| s.as_str()) {
                             Some("math") => MODULE_MATH,
                             Some("random") => MODULE_RANDOM,
+                            Some("files") => MODULE_FILES,
                             _ => MODULE_UNKNOWN,
                         };
                         self.modules.insert(last.clone(), id);
@@ -206,6 +215,16 @@ impl Compiler {
                         .unwrap_or(0) as u16;
                     let idx = self.reserve_proto(&name, params);
                     self.fn_ids.insert(name, idx);
+                    self.fn_decls.push((idx, n.clone()));
+                }
+                K::TestDecl => {
+                    let raw = n
+                        .find_token(K::StrLit)
+                        .map(|t| t.text.clone())
+                        .unwrap_or_default();
+                    let name = spider_syntax::interpolation::plain_text(&raw);
+                    let idx = self.reserve_proto(&format!("test {name}"), 0);
+                    self.tests.push((name, idx));
                     self.fn_decls.push((idx, n.clone()));
                 }
                 K::RecordDecl => {
@@ -1066,6 +1085,12 @@ impl Compiler {
                 if let Some(&idx) = self.fn_ids.get(&name) {
                     let dst = fb.reg();
                     fb.code.push(Instr::Call(dst, idx, args));
+                    return Ok(dst);
+                }
+                if name == "expect" {
+                    let cidx = fb.const_val(Value::text("expect"));
+                    let dst = fb.reg();
+                    fb.code.push(Instr::CallModule(dst, MODULE_BUILTIN, cidx, args));
                     return Ok(dst);
                 }
             }

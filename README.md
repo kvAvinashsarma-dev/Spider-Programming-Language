@@ -24,28 +24,28 @@ say "Welcome, {name}!"
 
 ## Project status
 
-**Milestone M3 "Silk" — shipped 2026-07-05. Spider programs run.**
-The Silk register-based bytecode VM executes the whole M3 language: real
-value semantics (copy-on-write), records/choices/match, `Outcome`/`try`,
-string interpolation (parsed, type-checked, executed), seedable `random`,
-and runtime panics in the same teaching format as compile errors. Exit
-criteria measured, not claimed: a **1119-case** differential semantics
-suite (self-counting gate ≥ 1000) and **cold start median 20 ms** against
-the 50 ms budget — now a CI gate.
+**Milestone M4 "Web-spinning" — shipped 2026-07-05. Safe Mode is real.**
+The standard library is typed against a single registry (**100%
+documented**, CI-enforced), and capabilities are enforced twice: at check
+time (`use files` without a grant is a teaching error pointing at the
+line) and again inside the VM at the operation — no code path around the
+declaration. `spider test` runs `test "…"` blocks on a fresh VM each, with
+`expect(actual, expected)` failures rendered as full explanations.
 
 ```
-spider run file.sp               # check + run on the Silk VM
-spider repl                      # persistent interactive session
-spider new my-project            # scaffold a project
-spider check / fmt / explain     # the M1–M2 toolchain, still zero-config
-cargo test --workspace           # 71 tests incl. the 1119-case suite
+spider run file.sp               # Safe Mode: zero capabilities by default
+spider run --allow fs script.sp  # explicit, per-run capability grant
+spider test .                    # run every test block, isolated
+spider repl / new / check / fmt  # the rest of the toolchain
+cargo test --workspace           # 82 tests incl. the 1120-case suite
 ```
 
 Shipped so far: M1 Hatchling ([notes](docs/0004-m1-hatchling-notes.md)),
 M2 Spinneret ([notes](docs/0005-m2-spinneret-notes.md)),
-M3 Silk ([notes](docs/0006-m3-silk-notes.md)).
-Next: **M4 "Web-spinning"** — the typed standard library core,
-capability-gated `files`, `spider test`, and lexer-level interpolation.
+M3 Silk ([notes](docs/0006-m3-silk-notes.md)),
+M4 Web-spinning ([notes](docs/0007-m4-web-spinning-notes.md)).
+Next: **M5 "First Thread"** — multi-file modules and the `web` package
+manager MVP with capability diffing.
 
 ## Documents
 

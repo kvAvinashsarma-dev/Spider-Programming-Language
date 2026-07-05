@@ -450,11 +450,18 @@ fn runtime_panic_grid() {
     }
     check_panic("let m = {\"a\": 1}\nsay m[\"zzz\"]\n", "E0304");
     check_panic("record P\n    x: Int\n\nsay [P(1), P(2)].sort()\n", "E0305");
-    check_panic("use math\nsay math.wibble(1.0)\n", "E0306");
+    // Unknown module members moved to check time in M4 (typed stdlib).
+    CASES.with(|c| c.set(c.get() + 1));
+    let e = spider_silk::run_capture("use math\nsay math.wibble(1.0)\n", &[]).unwrap_err();
+    assert!(e.contains("E0306") && e.contains("wibble"), "{e}");
     check_panic(
         "fn f(n: Int) -> Int\n    return f(n)\n\nsay f(0)\n",
         "E0307",
     );
+    // Safe Mode: capability denial is a check error without a grant…
+    CASES.with(|c| c.set(c.get() + 1));
+    let e = spider_silk::run_capture("use files\nsay files.exists(\"x\")\n", &[]).unwrap_err();
+    assert!(e.contains("E0244"), "{e}");
 }
 
 #[test]
