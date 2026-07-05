@@ -20,6 +20,45 @@ pub struct Parse {
     pub diagnostics: Vec<Diagnostic>,
 }
 
+/// Parses a standalone expression (used for the `{…}` holes in text and by
+/// the REPL). The root is a `SourceFile` whose first child node is the
+/// expression.
+pub fn parse_expr_source(src: &str) -> Parse {
+    let (tokens, lex_diags) = lex(src);
+    let mut offsets = Vec::with_capacity(tokens.len());
+    let mut acc = 0usize;
+    for t in &tokens {
+        offsets.push(acc);
+        acc += t.text.chars().count();
+    }
+    let mut p = Parser {
+        tokens,
+        offsets,
+        pos: 0,
+        stack: Vec::new(),
+        diags: Vec::new(),
+        depth: 0,
+    };
+    p.start(K::SourceFile);
+    p.expr();
+    while !p.at(K::Eof) {
+        if matches!(p.current(), K::Newline | K::Indent | K::Dedent) {
+            p.bump();
+            continue;
+        }
+        p.error_at_current("E0120", "expected the expression to end here");
+        p.start(K::ErrorNode);
+        p.bump();
+        p.finish();
+    }
+    p.bump(); // Eof
+    let root = p.finish_root();
+    let mut diagnostics = lex_diags;
+    diagnostics.extend(p.diags);
+    diagnostics.sort_by_key(|d| d.offset);
+    Parse { root, diagnostics }
+}
+
 pub fn parse(src: &str) -> Parse {
     let (tokens, lex_diags) = lex(src);
 

@@ -1,19 +1,17 @@
-//! The `spider` command-line tool — Milestone M1 surface.
-//!
-//! M1 ships: fmt, check, tree, tokens, explain. Later milestones add
-//! run/build/test/new (execution arrives with the Silk VM in M3; `spider new`
-//! ships alongside `spider run` so a freshly scaffolded project can actually
-//! be run the moment it is created).
+//! The `spider` command-line tool — Milestone M3 surface.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 
-const VERSION: &str = "spider 0.1.0 (Milestone M1 \"Hatchling\")";
+const VERSION: &str = "spider 0.1.0 (Milestone M3 \"Silk\")";
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let code = match args.first().map(|s| s.as_str()) {
+        Some("run") => cmd_run(&args[1..]),
+        Some("new") => cmd_new(&args[1..]),
+        Some("repl") => cmd_repl(),
         Some("fmt") => cmd_fmt(&args[1..]),
         Some("check") => cmd_check(&args[1..]),
         Some("tree") => cmd_tree(&args[1..]),
@@ -29,7 +27,7 @@ fn main() {
         }
         Some(other) => {
             eprintln!("spider: `{other}` is not a command yet.");
-            eprintln!("  (run, build, test, and new arrive with the Silk VM in Milestone M3)");
+            eprintln!("  (build and test arrive in M4/M8)");
             print_help();
             2
         }
@@ -43,14 +41,162 @@ fn print_help() {
     println!("Usage: spider <command> [arguments]");
     println!();
     println!("Commands:");
+    println!("  run <file.sp>        check and run a Spider program");
+    println!("  repl                 interactive Spider session");
+    println!("  new <name>           create a new Spider project");
     println!("  fmt <paths...>       format .sp files in place (--check: report only)");
-    println!("  check <file.sp>      parse a file and explain every problem found");
+    println!("  check <file.sp>      parse + resolve + type-check, explain every problem");
     println!("  tree <file.sp>       show the syntax tree (debugging)");
     println!("  tokens <file.sp>     show the token stream (debugging)");
     println!("  explain <E0123>      explain an error code");
     println!("  --version            show the toolchain version");
     println!();
-    println!("Coming in M3: run, build, test, new, repl.");
+    println!("Coming later: build (native, M8), test (M4).");
+}
+
+fn cmd_run(args: &[String]) -> i32 {
+    let Some(path) = require_file(args, "run") else {
+        return 2;
+    };
+    let path = if path.is_dir() {
+        path.join("src").join("main.sp")
+    } else {
+        path
+    };
+    let src = match read_source(&path) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("{e}");
+            return 2;
+        }
+    };
+    let file = path.display().to_string();
+    match spider_silk::prepare(&src) {
+        Ok(prepared) => {
+            for w in &prepared.warnings {
+                eprint!("{}", spider_syntax::render(&src, &file, w));
+                eprintln!();
+            }
+            let mut io = spider_silk::ConsoleIo;
+            let mut vm = spider_silk::Vm::new(&mut io);
+            match vm.run(&prepared.program) {
+                Ok(_) => 0,
+                Err(e) => {
+                    eprint!("{}", spider_silk::render_panic(&e));
+                    1
+                }
+            }
+        }
+        Err(spider_silk::PrepareError::Diagnostics(diags)) => {
+            for d in &diags {
+                eprint!("{}", spider_syntax::render(&src, &file, d));
+                eprintln!();
+            }
+            eprintln!("{} problem(s) — nothing was run", diags.len());
+            1
+        }
+        Err(spider_silk::PrepareError::Internal(m)) => {
+            eprintln!("internal Spider error (a bug in Spider, not your code): {m}");
+            eprintln!("please report it: https://github.com/spider-lang/spider/issues");
+            1
+        }
+    }
+}
+
+fn cmd_new(args: &[String]) -> i32 {
+    let Some(name) = args.first() else {
+        eprintln!("spider: new needs a project name. Example: spider new lemonade-stand");
+        return 2;
+    };
+    let root = PathBuf::from(name);
+    if root.exists() {
+        eprintln!("spider: `{name}` already exists — pick a fresh name.");
+        return 1;
+    }
+    let src_dir = root.join("src");
+    if let Err(e) = fs::create_dir_all(&src_dir) {
+        eprintln!("spider: cannot create {}: {e}", src_dir.display());
+        return 1;
+    }
+    let manifest = format!(
+        "[project]\nname = \"{name}\"\nversion = \"0.1.0\"\nspider = \"0.1\"\n\n[capabilities]\nallow = []\n\n[dependencies]\n"
+    );
+    let main_sp = "say \"Hello from Spider!\"\n\nlet name = ask \"What is your name?\"\nsay \"Welcome, {name}!\"\n";
+    let readme = format!(
+        "# {name}\n\nA Spider project.\n\n```\nspider run .        # run it\nspider check src    # explain any problems\nspider fmt src      # canonical formatting\n```\n"
+    );
+    let writes = [
+        (root.join("web.toml"), manifest),
+        (src_dir.join("main.sp"), main_sp.to_string()),
+        (root.join("README.md"), readme),
+        (root.join(".gitignore"), "/target\n".to_string()),
+    ];
+    for (p, content) in writes {
+        if let Err(e) = fs::write(&p, content) {
+            eprintln!("spider: cannot write {}: {e}", p.display());
+            return 1;
+        }
+    }
+    println!("Spun up `{name}`:");
+    println!("  {name}/web.toml       project manifest (capabilities start empty)");
+    println!("  {name}/src/main.sp    your program");
+    println!();
+    println!("Next:  cd {name}  then  spider run .");
+    0
+}
+
+fn cmd_repl() -> i32 {
+    use std::io::{BufRead, Write};
+    println!("{VERSION}");
+    println!("Type Spider code. Finish a block with an empty line. `exit` leaves.");
+    let stdin = std::io::stdin();
+    let mut session = spider_silk::Session::new();
+    let mut io = spider_silk::ConsoleIo;
+    loop {
+        print!("spider> ");
+        let _ = std::io::stdout().flush();
+        let mut entry = String::new();
+        if stdin.lock().read_line(&mut entry).unwrap_or(0) == 0 {
+            return 0; // EOF
+        }
+        let first = entry.trim();
+        if first.is_empty() {
+            continue;
+        }
+        if matches!(first, "exit" | "quit" | "exit()" | "quit()") {
+            return 0;
+        }
+        while spider_silk::Session::is_incomplete(&entry) {
+            print!("   ...> ");
+            let _ = std::io::stdout().flush();
+            let mut line = String::new();
+            if stdin.lock().read_line(&mut line).unwrap_or(0) == 0 {
+                break;
+            }
+            if line.trim().is_empty() {
+                break;
+            }
+            entry.push_str(&line);
+        }
+        match session.eval(&entry, &mut io) {
+            spider_silk::EvalOutcome::Value(v) => {
+                if !matches!(v, spider_silk::Value::Unit) {
+                    println!("= {}", spider_silk::display(&v, true));
+                }
+            }
+            spider_silk::EvalOutcome::Diagnostics(diags) => {
+                for d in diags.iter().filter(|d| d.is_error() || d.code != "W0001") {
+                    print!("{}", spider_syntax::render(&entry, "<repl>", d));
+                }
+            }
+            spider_silk::EvalOutcome::Runtime(e) => {
+                print!("{}", spider_silk::render_panic(&e));
+            }
+            spider_silk::EvalOutcome::Internal(m) => {
+                println!("internal Spider error: {m}");
+            }
+        }
+    }
 }
 
 fn read_source(path: &Path) -> Result<String, String> {

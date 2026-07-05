@@ -1,0 +1,4 @@
+a circle of radius 1.0 — area 3.14159
+a 2.0 by 3.0 rectangle — area 6.0
+a dot — area 0.0
+point: Point(x: 3.0, y: 4.0)

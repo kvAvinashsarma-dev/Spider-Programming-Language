@@ -7,15 +7,16 @@
 
 pub mod ast;
 pub mod diagnostics;
+pub mod interpolation;
 pub mod kind;
 pub mod lexer;
 pub mod parser;
 pub mod tree;
 
-pub use diagnostics::{explain, line_col, render, Diagnostic, Explain};
+pub use diagnostics::{explain, line_col, render, Diagnostic, Explain, Severity};
 pub use kind::SyntaxKind;
 pub use lexer::{lex, Token};
-pub use parser::{parse, Parse};
+pub use parser::{parse, parse_expr_source, Parse};
 pub use tree::{Element, Node};
 
 /// Strips a UTF-8 byte-order mark, which some Windows editors prepend.

@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/spider-syntax",
     "crates/spider-hir",
+    "crates/spider-silk",
     "crates/spider-fmt",
     "crates/spider-cli",
 ]

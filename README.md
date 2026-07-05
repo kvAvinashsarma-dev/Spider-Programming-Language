@@ -24,26 +24,28 @@ say "Welcome, {name}!"
 
 ## Project status
 
-**Milestone M2 "Spinneret" — shipped 2026-07-05.** The compiler now has a
-semantic brain: name resolution, unification-based type inference (no
-annotations needed on locals, generics instantiated per call site),
-exhaustive-match analysis, `try`/`Outcome` rules, "did you mean" suggestions
-on every unknown name, contextual keywords (`fn area(shape: Shape)` is
-legal — ADR-011), and **59 authored error codes** with what/why/fix
-explanations, the ≥50 gate CI-enforced. 39 tests green.
+**Milestone M3 "Silk" — shipped 2026-07-05. Spider programs run.**
+The Silk register-based bytecode VM executes the whole M3 language: real
+value semantics (copy-on-write), records/choices/match, `Outcome`/`try`,
+string interpolation (parsed, type-checked, executed), seedable `random`,
+and runtime panics in the same teaching format as compile errors. Exit
+criteria measured, not claimed: a **1119-case** differential semantics
+suite (self-counting gate ≥ 1000) and **cold start median 20 ms** against
+the 50 ms budget — now a CI gate.
 
 ```
-cargo build --workspace          # build the toolchain
-cargo test  --workspace          # 39 tests: goldens, fuzz, inference corpus
-spider check file.sp             # parse + names + types, teaching diagnostics
-spider fmt  file.sp              # canonical formatting (no options)
-spider tree / tokens / explain   # debugging & the error database
+spider run file.sp               # check + run on the Silk VM
+spider repl                      # persistent interactive session
+spider new my-project            # scaffold a project
+spider check / fmt / explain     # the M1–M2 toolchain, still zero-config
+cargo test --workspace           # 71 tests incl. the 1119-case suite
 ```
 
 Shipped so far: M1 Hatchling ([notes](docs/0004-m1-hatchling-notes.md)),
-M2 Spinneret ([notes](docs/0005-m2-spinneret-notes.md)).
-Next: **M3 "Silk"** — the bytecode VM: `spider run`, the REPL, tokenized
-string interpolation, and the < 50 ms cold-start budget measured in CI.
+M2 Spinneret ([notes](docs/0005-m2-spinneret-notes.md)),
+M3 Silk ([notes](docs/0006-m3-silk-notes.md)).
+Next: **M4 "Web-spinning"** — the typed standard library core,
+capability-gated `files`, `spider test`, and lexer-level interpolation.
 
 ## Documents
 

@@ -397,10 +397,51 @@ pub fn explain(code: &str) -> Option<Explain> {
             "constraints must be built-in (Comparable, Equatable, Printable) or a declared shape.",
             "check the spelling, or declare a shape with that name.",
         ),
+        "E0243" => (
+            "the code inside { } in this text is not a valid expression.",
+            "everything between { and } in text is real Spider code whose value gets woven into the text.",
+            "fix the code inside the braces — or, for a literal brace, write \\{ and \\}.",
+        ),
         "E0242" => (
             "functions, records, choices, and shapes live at the top level of a file.",
             "nested declarations arrive in a later Spider version; keeping them top-level keeps files easy to navigate.",
             "move this declaration out of the block, to the left margin.",
+        ),
+        // ----- runtime panics (the program stopped; these are not compile errors) -----
+        "E0301" => (
+            "the program divided a number by zero and stopped.",
+            "no number times zero gives the left side back, so the answer doesn't exist.",
+            "check the divisor before dividing: `if count > 0`.",
+        ),
+        "E0302" => (
+            "a whole-number calculation grew past what Int can hold, and the program stopped.",
+            "Int holds numbers up to about 9.2 quintillion; going past that would silently wrap to a wrong value in many languages — Spider stops instead.",
+            "use Float for huge approximate values, or restructure the calculation.",
+        ),
+        "E0303" => (
+            "the program asked a list for a position it doesn't have, and stopped.",
+            "positions count from 0, so a list of 3 items has positions 0, 1, and 2.",
+            "check `.length()` first, or loop with `for item in items` which can never miss.",
+        ),
+        "E0304" => (
+            "the program asked a map for a key it doesn't hold, and stopped.",
+            "reading a missing key has no honest answer, so Spider stops rather than invent one.",
+            "check with `.has(key)` first.",
+        ),
+        "E0305" => (
+            "the items in this list have no smaller-or-larger order, so it cannot be sorted.",
+            "sorting needs to compare items; numbers and text compare, records and choices don't (yet).",
+            "sort a list of numbers or text, or transform the items into something comparable first.",
+        ),
+        "E0306" => (
+            "this module has no member with that name (in this Spider version).",
+            "only the `math` and `random` modules run in Milestone M3; the full standard library arrives in M4.",
+            "check the spelling, or wait for the M4 standard library.",
+        ),
+        "E0307" => (
+            "the program called functions too deeply and stopped.",
+            "each unfinished call needs memory; endless recursion would eat it all — Spider stops at 1000 nested calls in this version.",
+            "check that the recursion has a base case that is actually reached.",
         ),
         // ----- warnings -----
         "W0001" => (
@@ -412,6 +453,11 @@ pub fn explain(code: &str) -> Option<Explain> {
             "this module is not part of Spider's standard library.",
             "multi-file projects and packages arrive in Milestone M5; until then only standard modules resolve.",
             "check the spelling against the standard library list, or wait for M5 for your own modules.",
+        ),
+        "W0003" => (
+            "this code will run, but one line at a time for now.",
+            "the concurrent scheduler ships in Milestone M7; until then `do together` and `spawn` run in order, which gives the same results for code without timing dependencies.",
+            "nothing to fix — this note disappears in M7.",
         ),
         _ => return None,
     };
@@ -430,7 +476,8 @@ pub const ALL_CODES: &[&str] = &[
     "E0170", "E0201", "E0203", "E0204", "E0208", "E0209", "E0210", "E0211", "E0212", "E0213",
     "E0214", "E0215", "E0216", "E0217", "E0218", "E0219", "E0220", "E0221", "E0222", "E0223",
     "E0224", "E0225", "E0226", "E0227", "E0228", "E0229", "E0230", "E0231", "E0232", "E0233",
-    "E0234", "E0235", "E0236", "E0237", "E0240", "E0241", "E0242", "W0001", "W0002",
+    "E0234", "E0235", "E0236", "E0237", "E0240", "E0241", "E0242", "E0243", "E0301", "E0302",
+    "E0303", "E0304", "E0305", "E0306", "E0307", "W0001", "W0002", "W0003",
 ];
 
 #[cfg(test)]

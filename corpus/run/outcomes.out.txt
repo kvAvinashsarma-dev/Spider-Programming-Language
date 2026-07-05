@@ -1,0 +1,5 @@
+95: A
+80: B
+12: keep going
+-3: oops — scores start at zero
+with fallback: ?

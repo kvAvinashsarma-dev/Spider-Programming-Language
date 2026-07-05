@@ -51,6 +51,7 @@ pub fn check_parse(parse: &Parse) -> Vec<Diagnostic> {
         scopes: Vec::new(),
         current_ret: None,
         current_rigids: HashSet::new(),
+        span_override: None,
     };
     c.collect_names(&parse.root);
     c.collect_signatures(&parse.root);
@@ -73,13 +74,16 @@ struct Checker {
     scopes: Vec<HashMap<String, Local>>,
     current_ret: Option<Ty>,
     current_rigids: HashSet<String>,
+    /// While checking code parsed out of a `{…}` hole, all diagnostics land
+    /// on the enclosing string literal's span.
+    span_override: Option<(usize, usize)>,
 }
 
 impl Checker {
     // ----- diagnostics -----
 
     fn err(&mut self, node: &Rc<Node>, code: &'static str, msg: impl Into<String>) {
-        let (start, end) = self.spans.of(node);
+        let (start, end) = self.span_override.unwrap_or_else(|| self.spans.of(node));
         self.diags
             .push(Diagnostic::error(code, msg, start, end.saturating_sub(start)));
     }
@@ -568,7 +572,19 @@ impl Checker {
                 self.check_assign(n);
                 None
             }
-            K::SayStmt | K::SpawnStmt => {
+            K::SayStmt => {
+                if let Some(e) = expr_children(n).first() {
+                    self.ty_of(e);
+                }
+                None
+            }
+            K::SpawnStmt => {
+                let span = self.spans.of(n);
+                self.warn(
+                    span,
+                    "W0003",
+                    "`spawn` runs one line at a time until Milestone M7",
+                );
                 if let Some(e) = expr_children(n).first() {
                     self.ty_of(e);
                 }
@@ -623,6 +639,12 @@ impl Checker {
                 None
             }
             K::DoTogetherStmt => {
+                let span = self.spans.of(n);
+                self.warn(
+                    span,
+                    "W0003",
+                    "`do together` runs one line at a time until Milestone M7",
+                );
                 self.scoped_block(n);
                 None
             }
@@ -891,11 +913,11 @@ impl Checker {
                     Some(K::IntLit) => Ty::Int,
                     Some(K::FloatLit) => Ty::Float,
                     Some(K::StrLit) => {
-                        // Interpolation is not tokenized until M3, but names
-                        // inside `{…}` are real uses — mark them so W0001
-                        // never fires falsely. Marking only; never an error.
+                        // Every `{…}` hole is real code: parsed with the real
+                        // parser and type-checked in the current scope.
                         if let Some(t) = tok {
-                            self.mark_interpolated_names(&t.text);
+                            let text = t.text.clone();
+                            self.check_interpolation(n, &text);
                         }
                         Ty::Text
                     }
@@ -1023,35 +1045,31 @@ impl Checker {
         }
     }
 
-    fn mark_interpolated_names(&mut self, literal: &str) {
-        let chars: Vec<char> = literal.chars().collect();
-        let mut i = 0;
-        while i < chars.len() {
-            if chars[i] == '{' {
-                let start = i + 1;
-                let mut j = start;
-                while j < chars.len() && chars[j] != '}' && chars[j] != '"' {
-                    j += 1;
-                }
-                if j < chars.len() && chars[j] == '}' {
-                    let inner: String = chars[start..j].iter().collect();
-                    let name = inner.trim();
-                    if !name.is_empty()
-                        && name
-                            .chars()
-                            .all(|c| c == '_' || c.is_ascii_alphanumeric())
-                    {
-                        for scope in self.scopes.iter_mut().rev() {
-                            if let Some(l) = scope.get_mut(name) {
-                                l.used = true;
-                                break;
-                            }
-                        }
-                    }
-                    i = j;
-                }
+    fn check_interpolation(&mut self, literal_node: &Rc<Node>, literal_text: &str) {
+        use spider_syntax::interpolation::{segments, Segment};
+        let span = self.spans.of(literal_node);
+        for seg in segments(literal_text) {
+            let Segment::Expr(src) = seg else { continue };
+            if src.trim().is_empty() {
+                self.err_span(span, "E0243", "this text has an empty { } hole");
+                continue;
             }
-            i += 1;
+            let fragment = spider_syntax::parse_expr_source(&src);
+            if let Some(first) = fragment.diagnostics.first() {
+                let msg = format!(
+                    "the code inside {{ }} is not a valid expression: {}",
+                    first.message
+                );
+                self.err_span(span, "E0243", msg);
+                continue;
+            }
+            let exprs = expr_children(&fragment.root);
+            if let Some(e) = exprs.first() {
+                let saved = self.span_override;
+                self.span_override = Some(span);
+                self.ty_of(e);
+                self.span_override = saved;
+            }
         }
     }
 

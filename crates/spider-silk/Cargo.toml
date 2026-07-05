@@ -1,0 +1,10 @@
+[package]
+name = "spider-silk"
+description = "The Silk virtual machine and bytecode compiler (Milestone M3)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+spider-syntax = { path = "../spider-syntax" }
+spider-hir = { path = "../spider-hir" }

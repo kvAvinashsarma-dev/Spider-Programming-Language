@@ -110,6 +110,22 @@ marked-as-used but not checked until M3 tokenizes interpolation; a warning
 that can be wrong is treated as a defect (W0001 false-positive found and
 fixed via the corpus).
 
+## ADR-013 — M3 execution rulings
+**Status:** Accepted (2026-07-05) · **Refs:** M3 notes (doc 0006)
+(1) `spider run` executes top-level statements, then auto-calls zero-arity
+`fn main()`; the REPL never auto-calls main. (2) The VM keeps call frames on
+an explicit heap stack — Spider recursion cannot overflow the host stack;
+the limit is a language rule (1000, E0307). (3) Value semantics are
+implemented copy-on-write; maps are insertion-ordered vectors (deterministic
+iteration is a guarantee, honest O(n) lookup until M8). (4) Int is 64-bit
+checked (overflow panics E0302, per ADR-009); Float follows IEEE and never
+panics. (5) Interpolation holes are parsed by the real parser and checked in
+scope via a shared scanner; token-level interpolation in the lexer is M4
+work (holes cannot contain text literals until then). (6) Bare `try` on a
+`Maybe` propagates `Fail("the value was missing")`. (7) `test` blocks run
+under `spider test` (M4), never under `spider run`. (8) Concurrency
+constructs run sequentially until M7 and the checker says so (W0003).
+
 ---
 
 *Add new entries below; never edit accepted entries — supersede them.*

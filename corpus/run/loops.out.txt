@@ -1,0 +1,10 @@
+sum 1..10 = 55
+hip hip
+hip hip
+hip hip
+lives: 3
+lives: 2
+lives: 1
+fib(15) = 610
+sqrt(2) is about 1.4142135623730951
+dice: 5 and 3

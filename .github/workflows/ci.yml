@@ -19,3 +19,27 @@ jobs:
       - run: cargo build --workspace
       - run: cargo test --workspace
       - run: cargo fmt --all -- --check
+
+  cold-start:
+    name: cold start < 50 ms (SRS G2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release -p spider-cli
+      - name: measure spider run hello
+        run: |
+          echo 'say "hello"' > /tmp/hello.sp
+          ./target/release/spider run /tmp/hello.sp > /dev/null   # warm the fs cache
+          total=0
+          for i in $(seq 1 15); do
+            start=$(date +%s%N)
+            ./target/release/spider run /tmp/hello.sp > /dev/null
+            end=$(date +%s%N)
+            ms=$(( (end - start) / 1000000 ))
+            echo "run $i: ${ms} ms"
+            total=$(( total + ms ))
+          done
+          avg=$(( total / 15 ))
+          echo "average: ${avg} ms (budget: 50 ms)"
+          test "$avg" -lt 50
