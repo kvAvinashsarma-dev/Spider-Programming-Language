@@ -13,6 +13,8 @@ fn main() {
         Some("test") => cmd_test(&args[1..]),
         Some("new") => cmd_new(&args[1..]),
         Some("repl") => cmd_repl(&args[1..]),
+        Some("lsp") => spider_lsp::run_stdio(),
+        Some("learn") => cmd_learn(&args[1..]),
         Some("fmt") => cmd_fmt(&args[1..]),
         Some("check") => cmd_check(&args[1..]),
         Some("tree") => cmd_tree(&args[1..]),
@@ -51,6 +53,8 @@ fn print_help() {
     println!("  tree <file.sp>       show the syntax tree (debugging)");
     println!("  tokens <file.sp>     show the token stream (debugging)");
     println!("  explain <E0123>      explain an error code");
+    println!("  learn <file.sp>      list the concepts a file uses, in plain language");
+    println!("  lsp                  language server over stdio (editors connect here)");
     println!("  --version            show the toolchain version");
     println!();
     println!("Capabilities (Safe Mode): programs may only touch files/network/etc.");
@@ -621,6 +625,44 @@ fn cmd_tokens(args: &[String]) -> i32 {
             2
         }
     }
+}
+
+/// Learn Mode: every construct the file uses, explained in one line each.
+fn cmd_learn(args: &[String]) -> i32 {
+    let Some(path) = require_file(args, "learn") else {
+        return 2;
+    };
+    let src = match read_source(&path) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("{e}");
+            return 2;
+        }
+    };
+    let (tokens, _) = spider_syntax::lex(&src);
+    let mut seen = Vec::new();
+    for t in &tokens {
+        if t.kind.is_trivia() || t.text.is_empty() {
+            continue;
+        }
+        if let Some(c) = spider_syntax::concepts::concept(&t.text) {
+            if !seen.iter().any(|(w, _)| *w == t.text) {
+                seen.push((t.text.clone(), c));
+            }
+        }
+    }
+    if seen.is_empty() {
+        println!("no Spider constructs found in {}", path.display());
+        return 0;
+    }
+    println!("Concepts used in {} ({}):", path.display(), seen.len());
+    println!();
+    for (word, c) in seen {
+        println!("  {word:<9} {c}");
+    }
+    println!();
+    println!("Deeper on any error: spider explain E0123 · hover in your editor shows these too.");
+    0
 }
 
 fn cmd_explain(args: &[String]) -> i32 {

@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "spider-fmt",
  "spider-hir",
+ "spider-lsp",
  "spider-silk",
  "spider-syntax",
  "spider-web",
@@ -24,6 +25,14 @@ dependencies = [
 name = "spider-hir"
 version = "0.1.0"
 dependencies = [
+ "spider-syntax",
+]
+
+[[package]]
+name = "spider-lsp"
+version = "0.1.0"
+dependencies = [
+ "spider-hir",
  "spider-syntax",
 ]
 

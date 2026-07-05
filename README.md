@@ -47,11 +47,16 @@ public/private boundaries, side-effect-free imports, cycle detection) and
 **capability diffing at install**: a dependency that wants more than your
 project allows is refused with the escalation spelled out. 89 tests green.
 
+**M6 "Loom" (partial)**: `spider lsp` — live diagnostics, teaching hovers,
+and completion in any LSP editor, protocol-tested without one; `spider
+learn` turns any file into a lesson plan. Playground/WASM waits on M8.
+
 Shipped so far: M1 Hatchling ([notes](docs/0004-m1-hatchling-notes.md)),
 M2 Spinneret ([notes](docs/0005-m2-spinneret-notes.md)),
 M3 Silk ([notes](docs/0006-m3-silk-notes.md)),
 M4 Web-spinning ([notes](docs/0007-m4-web-spinning-notes.md)),
-M5 First Thread ([notes](docs/0008-m5-first-thread-notes.md)).
+M5 First Thread ([notes](docs/0008-m5-first-thread-notes.md)),
+M6 Loom partial ([notes](docs/0009-m6-loom-notes.md)).
 
 ## Documents
 

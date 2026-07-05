@@ -1,0 +1,41 @@
+//! The Learn Mode concept database: one plain-language sentence per
+//! language construct. Used by editor hovers (LSP) and `--learn` output.
+
+pub fn concept(word: &str) -> Option<&'static str> {
+    Some(match word {
+        "let" => "`let` gives a name to a value that never changes: `let pi = 3.14`.",
+        "var" => "`var` gives a name to a value that can change later: `var score = 0`.",
+        "fn" => "`fn` creates a function — a named recipe you can run again and again with different ingredients.",
+        "if" => "`if` runs its indented lines only when the condition is true.",
+        "else" => "`else` is what happens when the `if` condition was false.",
+        "for" => "`for item in items` visits each thing in a list or range, one at a time.",
+        "in" => "`in` connects the loop's name to the collection it walks through.",
+        "while" => "`while` repeats its lines as long as the condition stays true.",
+        "repeat" => "`repeat 3 times` runs its lines exactly that many times — the simplest loop.",
+        "times" => "`times` finishes the phrase `repeat 3 times`.",
+        "match" => "`match` compares one value against several cases and runs the first that fits. Spider checks you covered every case.",
+        "try" => "`try` unwraps something that can fail: handle it here with `else`, or pass the failure upward.",
+        "use" => "`use` brings in a module — from the standard library, your project's files, or an installed package.",
+        "return" => "`return` ends the function and hands back a value.",
+        "say" => "`say` prints a line. Text in quotes can weave values in with braces: say \"Hi, {name}\".",
+        "ask" => "`ask` shows a question and gives back what the user types, as Text.",
+        "record" => "`record` bundles named fields into one value: record Point with x and y.",
+        "choice" => "`choice` is a value that is exactly one of several cases — like Circle or Rect or Dot.",
+        "shape" => "`shape` describes what something can do (its functions), not what it is.",
+        "test" => "`test \"name\"` is a block `spider test` runs to prove your code does what you meant.",
+        "public" => "`public` shares a definition with other modules; without it, it stays private to this file.",
+        "spawn" => "`spawn` starts work that runs alongside the rest (one line at a time until Milestone M7).",
+        "do" => "`do together` starts a block whose lines run at the same time (sequential until M7).",
+        "together" => "`together` finishes the phrase `do together`.",
+        "and" => "`and` is true only when both sides are true. It skips the right side if the left is already false.",
+        "or" => "`or` is true when either side is true. It skips the right side if the left is already true.",
+        "not" => "`not` flips a yes-or-no value: not true is false.",
+        "to" => "`to` builds a counting range: `1 to 10` means 1, 2, … 10.",
+        "of" => "`of` says what a container holds: List of Int, Maybe of Text.",
+        "where" => "`where T is Comparable` limits which types a function accepts.",
+        "is" => "`is` connects a type name to its capability in a `where` clause.",
+        "true" | "false" => "The two Bool values — Spider's yes and no.",
+        "expect" => "`expect(actual, expected)` makes a test fail loudly when the two values differ.",
+        _ => return None,
+    })
+}

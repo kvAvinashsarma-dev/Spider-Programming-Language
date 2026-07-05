@@ -1,0 +1,10 @@
+[package]
+name = "spider-lsp"
+description = "The Spider language server: live diagnostics, teaching hovers, completion"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+spider-syntax = { path = "../spider-syntax" }
+spider-hir = { path = "../spider-hir" }

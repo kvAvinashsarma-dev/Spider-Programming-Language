@@ -6,6 +6,7 @@
 //! - All diagnostics carry stable codes with authored Explain entries.
 
 pub mod ast;
+pub mod concepts;
 pub mod diagnostics;
 pub mod interpolation;
 pub mod kind;
