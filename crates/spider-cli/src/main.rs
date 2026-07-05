@@ -144,19 +144,19 @@ fn cmd_run(args: &[String]) -> i32 {
             return 2;
         }
     };
-    let src = match read_source(&path) {
-        Ok(s) => s,
+    let project = match spider_web::load_project(&path) {
+        Ok(p) => p,
         Err(e) => {
-            eprintln!("{e}");
-            return 2;
+            eprintln!("spider: {e}");
+            return 1;
         }
     };
-    let file = path.display().to_string();
     let policy = spider_hir::CapPolicy::Only(caps.clone());
-    match spider_silk::prepare_with(&src, &policy) {
+    match spider_web::prepare_project(&project, &policy) {
         Ok(prepared) => {
-            for w in &prepared.warnings {
-                eprint!("{}", spider_syntax::render(&src, &file, w));
+            for (i, w) in &prepared.warnings {
+                let m = &project.modules[*i];
+                eprint!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), w));
                 eprintln!();
             }
             let mut io = spider_silk::ConsoleIo;
@@ -170,15 +170,26 @@ fn cmd_run(args: &[String]) -> i32 {
                 }
             }
         }
-        Err(spider_silk::PrepareError::Diagnostics(diags)) => {
-            for d in &diags {
-                eprint!("{}", spider_syntax::render(&src, &file, d));
+        Err(err) => render_project_error(&project, err),
+    }
+}
+
+fn render_project_error(project: &spider_web::Project, err: spider_web::ProjectError) -> i32 {
+    match err {
+        spider_web::ProjectError::Load(e) => {
+            eprintln!("spider: {e}");
+            1
+        }
+        spider_web::ProjectError::Diagnostics(diags) => {
+            for (i, d) in &diags {
+                let m = &project.modules[*i];
+                eprint!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), d));
                 eprintln!();
             }
             eprintln!("{} problem(s) — nothing was run", diags.len());
             1
         }
-        Err(spider_silk::PrepareError::Internal(m)) => {
+        spider_web::ProjectError::Internal(m) => {
             eprintln!("internal Spider error (a bug in Spider, not your code): {m}");
             eprintln!("please report it: https://github.com/spider-lang/spider/issues");
             1
@@ -223,18 +234,33 @@ fn cmd_test(args: &[String]) -> i32 {
                 continue;
             }
         };
-        let policy = spider_hir::CapPolicy::Only(caps.clone());
-        let prepared = match spider_silk::prepare_with(&src, &policy) {
+        let _ = &src;
+        let project = match spider_web::load_project(file) {
             Ok(p) => p,
-            Err(spider_silk::PrepareError::Diagnostics(diags)) => {
+            Err(e) => {
+                eprintln!("spider: {e}");
+                broken += 1;
+                continue;
+            }
+        };
+        let policy = spider_hir::CapPolicy::Only(caps.clone());
+        let prepared = match spider_web::prepare_project(&project, &policy) {
+            Ok(p) => p,
+            Err(spider_web::ProjectError::Diagnostics(diags)) => {
                 eprintln!("{}: {} problem(s) — its tests cannot run:", file.display(), diags.len());
-                if let Some(d) = diags.first() {
-                    eprint!("{}", spider_syntax::render(&src, &file.display().to_string(), d));
+                if let Some((i, d)) = diags.first() {
+                    let m = &project.modules[*i];
+                    eprint!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), d));
                 }
                 broken += 1;
                 continue;
             }
-            Err(spider_silk::PrepareError::Internal(m)) => {
+            Err(spider_web::ProjectError::Load(e)) => {
+                eprintln!("spider: {e}");
+                broken += 1;
+                continue;
+            }
+            Err(spider_web::ProjectError::Internal(m)) => {
                 eprintln!("internal Spider error: {m}");
                 broken += 1;
                 continue;
@@ -508,16 +534,48 @@ fn cmd_check(args: &[String]) -> i32 {
     };
     // Syntax first; names and types only run over a clean parse, so every
     // message describes the user's actual mistake, not a recovery artifact.
-    let diags = spider_hir::check_source(&src);
+    let _ = &src;
+    let project = match spider_web::load_project(&path) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("spider: {e}");
+            return 1;
+        }
+    };
+    let mut diags: Vec<(usize, spider_syntax::Diagnostic)> = Vec::new();
+    for (i, m) in project.modules.iter().enumerate() {
+        for d in &m.parse.diagnostics {
+            diags.push((i, d.clone()));
+        }
+    }
     if diags.is_empty() {
-        println!("OK: no problems found in {}", path.display());
+        let mods: Vec<spider_hir::ProjectModule> = project
+            .modules
+            .iter()
+            .map(|m| spider_hir::ProjectModule {
+                name: m.name.clone(),
+                parse: &m.parse,
+                imports: m.imports.clone(),
+            })
+            .collect();
+        let caps = manifest_caps(&path).ok().flatten().unwrap_or_default();
+        diags = spider_hir::check_project(&mods, project.entry, &spider_hir::CapPolicy::Only(caps));
+    }
+    if diags.is_empty() {
+        let n = project.modules.len();
+        if n > 1 {
+            println!("OK: no problems found in {} ({} files)", path.display(), n);
+        } else {
+            println!("OK: no problems found in {}", path.display());
+        }
         return 0;
     }
-    for d in &diags {
-        print!("{}", spider_syntax::render(&src, &path.display().to_string(), d));
+    for (i, d) in &diags {
+        let m = &project.modules[*i];
+        print!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), d));
         println!();
     }
-    let errors = diags.iter().filter(|d| d.is_error()).count();
+    let errors = diags.iter().filter(|(_, d)| d.is_error()).count();
     let warnings = diags.len() - errors;
     println!(
         "{errors} error(s), {warnings} warning(s) in {}",

@@ -26,9 +26,9 @@ const STD_MODULES: &[&str] = &[
 const BUILTIN_CONSTRAINTS: &[&str] = &["Comparable", "Equatable", "Printable"];
 
 #[derive(Clone)]
-struct FnSig {
-    params: Vec<Ty>,
-    ret: Ty,
+pub(crate) struct FnSig {
+    pub(crate) params: Vec<Ty>,
+    pub(crate) ret: Ty,
 }
 
 struct Local {
@@ -38,10 +38,160 @@ struct Local {
     span: (usize, usize),
 }
 
+/// A public function another module may call: (params, return, is_public).
+pub type ExportedFn = (Vec<Ty>, Ty, bool);
+
+/// One module of a multi-file project, ready for `check_project`.
+pub struct ProjectModule<'a> {
+    /// The module's binding name (last path segment), e.g. `helpers`.
+    pub name: String,
+    pub parse: &'a Parse,
+    /// use-alias -> target module name, for imports that resolved to files.
+    pub imports: HashMap<String, String>,
+}
+
+/// Checks a whole project. Types (records/choices) are project-global;
+/// functions cross module boundaries only via `alias.fn(...)` and only when
+/// `public` (ADR-015). Returns diagnostics tagged with the module index.
+pub fn check_project(
+    modules: &[ProjectModule],
+    entry: usize,
+    policy: &CapPolicy,
+) -> Vec<(usize, Diagnostic)> {
+    let mut out: Vec<(usize, Diagnostic)> = Vec::new();
+
+    // Stage 1: merge type names across modules; duplicate type names across
+    // modules are reported on the later module.
+    let mut type_owner: HashMap<String, (usize, bool)> = HashMap::new(); // name -> (module, is_record)
+    for (i, m) in modules.iter().enumerate() {
+        for n in m.parse.root.child_nodes() {
+            if matches!(n.kind, K::RecordDecl | K::ChoiceDecl) {
+                if let Some(name) = n.find_token(K::Ident).map(|t| t.text.clone()) {
+                    if type_owner.contains_key(&name) {
+                        let spans = SpanMap::build(&m.parse.root);
+                        let (s, e) = spans.of(n);
+                        out.push((
+                            i,
+                            Diagnostic::error(
+                                "E0203",
+                                format!("the type `{name}` already exists in another module of this project"),
+                                s,
+                                e.saturating_sub(s),
+                            ),
+                        ));
+                    } else {
+                        type_owner.insert(name, (i, n.kind == K::RecordDecl));
+                    }
+                }
+            }
+        }
+    }
+
+    // Stage 2: per-module checkers, seeded with all project type names so
+    // cross-module type references classify; each resolves its own
+    // signatures (its own E0204/E0208/… fire exactly once, here).
+    let mut checkers: Vec<Checker> = Vec::new();
+    for (i, m) in modules.iter().enumerate() {
+        let mut c = new_checker(m.parse, policy);
+        c.known_user_aliases = m.imports.keys().cloned().collect();
+        for (tname, (owner, is_record)) in &type_owner {
+            if *owner != i {
+                if *is_record {
+                    c.records.entry(tname.clone()).or_default();
+                } else {
+                    c.choices.entry(tname.clone()).or_default();
+                }
+            }
+        }
+        c.collect_names(&m.parse.root);
+        c.collect_signatures(&m.parse.root);
+        checkers.push(c);
+    }
+
+    // Stage 3: merge resolved type tables, variants, constructors, exports.
+    let mut all_records = HashMap::new();
+    let mut all_choices = HashMap::new();
+    let mut all_variants = HashMap::new();
+    let mut ctor_fns: HashMap<String, FnSig> = HashMap::new();
+    let mut exports: HashMap<String, HashMap<String, ExportedFn>> = HashMap::new();
+    for (m, c) in modules.iter().zip(checkers.iter()) {
+        for (k, v) in &c.records {
+            if !v.is_empty() || !all_records.contains_key(k) {
+                all_records.insert(k.clone(), v.clone());
+            }
+        }
+        for (k, v) in &c.choices {
+            if !v.is_empty() || !all_choices.contains_key(k) {
+                all_choices.insert(k.clone(), v.clone());
+            }
+        }
+        for (k, v) in &c.variant_of {
+            all_variants.insert(k.clone(), v.clone());
+        }
+        let mut mod_exports = HashMap::new();
+        for (fname, sig) in &c.fns {
+            let is_ctor =
+                c.records.contains_key(fname) || c.variant_of.contains_key(fname);
+            if is_ctor {
+                ctor_fns.entry(fname.clone()).or_insert_with(|| sig.clone());
+            } else {
+                let is_public = c.public_fns.contains(fname);
+                mod_exports.insert(fname.clone(), (sig.params.clone(), sig.ret.clone(), is_public));
+            }
+        }
+        exports.insert(m.name.clone(), mod_exports);
+    }
+
+    // Stage 4: body-check each module with the merged world in view.
+    for (i, (m, mut c)) in modules.iter().zip(checkers.into_iter()).enumerate() {
+        c.records = all_records.clone();
+        c.choices = all_choices.clone();
+        c.variant_of = all_variants.clone();
+        for (name, sig) in &ctor_fns {
+            c.fns.entry(name.clone()).or_insert_with(|| sig.clone());
+        }
+        for (alias, target) in &m.imports {
+            if let Some(ex) = exports.get(target) {
+                c.user_modules.insert(alias.clone(), ex.clone());
+            }
+        }
+        c.is_entry_module = i == entry;
+        c.check_top(&m.parse.root);
+        c.diags.sort_by_key(|d| d.offset);
+        for d in c.diags {
+            out.push((i, d));
+        }
+    }
+    out
+}
+
 /// Checks with no capability policy — embedding and corpus tests.
 /// The CLI always calls `check_parse_caps` with a real policy.
 pub fn check_parse(parse: &Parse) -> Vec<Diagnostic> {
     check_parse_caps(parse, &CapPolicy::AllowAll)
+}
+
+fn new_checker(parse: &Parse, policy: &CapPolicy) -> Checker {
+    Checker {
+        spans: SpanMap::build(&parse.root),
+        uni: Unifier::new(),
+        diags: Vec::new(),
+        fns: HashMap::new(),
+        records: HashMap::new(),
+        choices: HashMap::new(),
+        variant_of: HashMap::new(),
+        shapes: HashSet::new(),
+        modules: HashSet::new(),
+        scopes: Vec::new(),
+        current_ret: None,
+        current_rigids: HashSet::new(),
+        span_override: None,
+        cap_policy: policy.clone(),
+        user_modules: HashMap::new(),
+        known_user_aliases: HashSet::new(),
+        public_fns: HashSet::new(),
+        is_entry_module: true,
+    }
 }
 
 pub fn check_parse_caps(parse: &Parse, policy: &CapPolicy) -> Vec<Diagnostic> {
@@ -60,6 +210,10 @@ pub fn check_parse_caps(parse: &Parse, policy: &CapPolicy) -> Vec<Diagnostic> {
         current_rigids: HashSet::new(),
         span_override: None,
         cap_policy: policy.clone(),
+        user_modules: HashMap::new(),
+        known_user_aliases: HashSet::new(),
+        public_fns: HashSet::new(),
+        is_entry_module: true,
     };
     c.collect_names(&parse.root);
     c.collect_signatures(&parse.root);
@@ -86,6 +240,13 @@ struct Checker {
     /// on the enclosing string literal's span.
     span_override: Option<(usize, usize)>,
     cap_policy: CapPolicy,
+    /// alias -> exported functions of a sibling module (project mode).
+    user_modules: HashMap<String, HashMap<String, ExportedFn>>,
+    /// Aliases that resolved to project files (suppresses W0002).
+    known_user_aliases: HashSet<String>,
+    public_fns: HashSet<String>,
+    /// Only the entry module may run top-level statements (E0246).
+    is_entry_module: bool,
 }
 
 impl Checker {
@@ -221,7 +382,9 @@ impl Checker {
                         .map(|t| t.text.clone())
                         .collect();
                     if let (Some(first), Some(last)) = (segments.first(), segments.last()) {
-                        if !STD_MODULES.contains(&first.as_str()) {
+                        if !STD_MODULES.contains(&first.as_str())
+                            && !self.known_user_aliases.contains(last)
+                        {
                             let msg = format!(
                                 "`{first}` is not a standard-library module{}",
                                 self.suggestion(
@@ -408,6 +571,9 @@ impl Checker {
             Some(t) => self.resolve_type(t, &rigids),
             None => Ty::Unit,
         };
+        if is_public {
+            self.public_fns.insert(name.clone());
+        }
         self.add_fn(n, &name, FnSig { params, ret });
     }
 
@@ -513,6 +679,13 @@ impl Checker {
                     self.current_ret = None;
                 }
                 _ => {
+                    if !self.is_entry_module {
+                        self.err(
+                            n,
+                            "E0246",
+                            "only the main file runs top-level code — modules hold definitions (fn, record, choice, shape, test)",
+                        );
+                    }
                     self.check_stmt(n);
                 }
             }
@@ -1367,6 +1540,41 @@ impl Checker {
             if self.modules.contains(&bname)
                 && self.scopes.iter().rev().all(|s| !s.contains_key(&bname))
             {
+                // A sibling project module?
+                if let Some(ex) = self.user_modules.get(&bname).cloned() {
+                    match ex.get(&method) {
+                        Some((params, ret, true)) => {
+                            let sig = FnSig {
+                                params: params.clone(),
+                                ret: ret.clone(),
+                            };
+                            let label = format!("{bname}.{method}");
+                            return self.check_call_against(&label, &sig, args, call);
+                        }
+                        Some((_, _, false)) => {
+                            let msg = format!(
+                                "`{method}` exists in `{bname}`, but it is not public — add `public` to its `fn` to share it"
+                            );
+                            self.err(callee, "E0306", msg);
+                            for a in args {
+                                self.ty_of(a);
+                            }
+                            return Ty::Any;
+                        }
+                        None => {
+                            let names: Vec<String> = ex.keys().cloned().collect();
+                            let msg = format!(
+                                "the module `{bname}` has no public function named `{method}`{}",
+                                self.suggestion(&method, &names)
+                            );
+                            self.err(callee, "E0306", msg);
+                            for a in args {
+                                self.ty_of(a);
+                            }
+                            return Ty::Any;
+                        }
+                    }
+                }
                 if let Some(mf) = stdlib::find_module_fn(&bname, &method) {
                     let sig = FnSig {
                         params: mf.params,
@@ -1439,6 +1647,13 @@ impl Checker {
             if self.modules.contains(&bname)
                 && self.scopes.iter().rev().all(|s| !s.contains_key(&bname))
             {
+                if self.user_modules.contains_key(&bname) {
+                    let msg = format!(
+                        "modules share functions — call one with `{bname}.{field}(…)`"
+                    );
+                    self.err(n, "E0306", msg);
+                    return Ty::Any;
+                }
                 if let Some(mc) = stdlib::find_module_const(&bname, &field) {
                     return mc.ty;
                 }

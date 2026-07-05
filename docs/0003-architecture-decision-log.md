@@ -141,6 +141,19 @@ and capability-free. (5) `files` failures are Outcome values, not panics:
 a missing file is expected failure per LDD §8.1. (6) Tests run one fresh VM
 each; inter-test state sharing is impossible by construction.
 
+## ADR-015 — Module system and package manager rules
+**Status:** Accepted (2026-07-05) · **Refs:** M5 notes (doc 0008), LDD §5–6
+(1) One file = one module; `use a.b` maps to `src/a/b.sp`; packages resolve
+via `web_modules/<pkg>/src/lib.sp`; stdlib names can never be shadowed by
+files. (2) Functions cross modules only via `alias.fn(...)` and only when
+`public`; types are project-global. (3) Only the entry file runs top-level
+code (E0246): imports are side-effect-free by construction. (4) Import
+cycles are errors that print the circle. (5) The registry is append-only
+(published versions immutable); installs are capability-diffed and refused
+on escalation; the lockfile records exact versions + content fingerprints;
+there are no install scripts. (6) The M5 registry is local; the public
+registry (signing, namespaces, semver enforcement) is post-1.0.
+
 ---
 
 *Add new entries below; never edit accepted entries — supersede them.*

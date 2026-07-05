@@ -10,6 +10,7 @@ dependencies = [
  "spider-hir",
  "spider-silk",
  "spider-syntax",
+ "spider-web",
 ]
 
 [[package]]
@@ -37,3 +38,12 @@ dependencies = [
 [[package]]
 name = "spider-syntax"
 version = "0.1.0"
+
+[[package]]
+name = "spider-web"
+version = "0.1.0"
+dependencies = [
+ "spider-hir",
+ "spider-silk",
+ "spider-syntax",
+]

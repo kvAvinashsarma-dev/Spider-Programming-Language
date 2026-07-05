@@ -12,7 +12,7 @@ pub mod span;
 pub mod stdlib;
 pub mod ty;
 
-pub use check::{check_parse, check_parse_caps};
+pub use check::{check_parse, check_parse_caps, check_project, ExportedFn, ProjectModule};
 pub use manifest::{parse_manifest, Manifest};
 pub use stdlib::CapPolicy;
 pub use ty::{Ty, Unifier};

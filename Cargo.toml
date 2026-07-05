@@ -5,6 +5,7 @@ members = [
     "crates/spider-hir",
     "crates/spider-silk",
     "crates/spider-fmt",
+    "crates/spider-web",
     "crates/spider-cli",
 ]
 

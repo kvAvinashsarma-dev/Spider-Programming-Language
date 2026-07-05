@@ -97,20 +97,50 @@ pub const MODULE_UNKNOWN: u8 = 255;
 /// back through its l-value path so value semantics hold.
 const MUTATING_METHODS: &[&str] = &["push"];
 
+/// One project module for `compile_project`.
+pub struct ModuleSrc<'a> {
+    pub name: String,
+    pub parse: &'a Parse,
+    /// use-alias -> target module name for imports resolved to files.
+    pub imports: HashMap<String, String>,
+}
+
 pub fn compile(parse: &Parse, preset_globals: Option<&HashMap<String, u16>>) -> Result<Program, String> {
+    let single = [ModuleSrc {
+        name: "main".into(),
+        parse,
+        imports: HashMap::new(),
+    }];
+    compile_project(&single, 0, preset_globals)
+}
+
+pub fn compile_project(
+    mods: &[ModuleSrc],
+    entry: usize,
+    preset_globals: Option<&HashMap<String, u16>>,
+) -> Result<Program, String> {
     let mut c = Compiler {
         fn_ids: HashMap::new(),
         fn_decls: Vec::new(),
         records: HashMap::new(),
         variants: HashMap::new(),
         modules: HashMap::new(),
+        module_imports: HashMap::new(),
+        current_module: String::new(),
         globals: preset_globals.cloned().unwrap_or_default(),
         protos: Vec::new(),
         tests: Vec::new(),
     };
-    c.collect(&parse.root)?;
-    c.compile_all(&parse.root)?;
-    let main = c.fn_ids.get("main").copied().filter(|&idx| {
+    c.reserve_proto("<script>", 0);
+    for m in mods {
+        c.current_module = m.name.clone();
+        c.module_imports.insert(m.name.clone(), m.imports.clone());
+        c.collect(&m.parse.root)?;
+    }
+    c.current_module = mods[entry].name.clone();
+    c.compile_all(&mods[entry].parse.root)?;
+    let main_key = format!("{}::main", mods[entry].name);
+    let main = c.fn_ids.get(&main_key).copied().filter(|&idx| {
         c.protos
             .get(idx as usize)
             .is_some_and(|p| p.n_params == 0)
@@ -161,17 +191,31 @@ struct VariantInfo {
 }
 
 struct Compiler {
+    /// Function ids, qualified `module::name`. Constructors are global.
     fn_ids: HashMap<String, u32>,
-    fn_decls: Vec<(u32, Rc<Node>)>,
+    fn_decls: Vec<(u32, Rc<Node>, String)>,
     records: HashMap<String, RecordInfo>,
     variants: HashMap<String, VariantInfo>,
     modules: HashMap<String, u8>,
+    /// module name -> (use-alias -> target module name)
+    module_imports: HashMap<String, HashMap<String, String>>,
+    current_module: String,
     globals: HashMap<String, u16>,
     protos: Vec<FnProto>,
     tests: Vec<(String, u32)>,
 }
 
 impl Compiler {
+    fn qualify(&self, name: &str) -> String {
+        format!("{}::{name}", self.current_module)
+    }
+
+    fn user_import(&self, alias: &str) -> Option<&String> {
+        self.module_imports
+            .get(&self.current_module)
+            .and_then(|m| m.get(alias))
+    }
+
     fn reserve_proto(&mut self, name: &str, n_params: u16) -> u32 {
         let idx = self.protos.len() as u32;
         self.protos.push(FnProto {
@@ -185,9 +229,6 @@ impl Compiler {
     }
 
     fn collect(&mut self, root: &Rc<Node>) -> Result<(), String> {
-        // Proto 0 is always the script entry.
-        self.reserve_proto("<script>", 0);
-
         for n in root.child_nodes() {
             match n.kind {
                 K::UseDecl => {
@@ -198,13 +239,21 @@ impl Compiler {
                         .map(|t| t.text.clone())
                         .collect();
                     if let Some(last) = segs.last() {
-                        let id = match segs.first().map(|s| s.as_str()) {
-                            Some("math") => MODULE_MATH,
-                            Some("random") => MODULE_RANDOM,
-                            Some("files") => MODULE_FILES,
-                            _ => MODULE_UNKNOWN,
-                        };
-                        self.modules.insert(last.clone(), id);
+                        // Imports the loader resolved to project files are
+                        // routed by module_imports, not the stdlib table.
+                        let is_user = self
+                            .module_imports
+                            .get(&self.current_module)
+                            .is_some_and(|m| m.contains_key(last));
+                        if !is_user {
+                            let id = match segs.first().map(|s| s.as_str()) {
+                                Some("math") => MODULE_MATH,
+                                Some("random") => MODULE_RANDOM,
+                                Some("files") => MODULE_FILES,
+                                _ => MODULE_UNKNOWN,
+                            };
+                            self.modules.insert(last.clone(), id);
+                        }
                     }
                 }
                 K::FnDecl => {
@@ -214,18 +263,23 @@ impl Compiler {
                         .map(|pl| pl.nodes_of(K::Param).len())
                         .unwrap_or(0) as u16;
                     let idx = self.reserve_proto(&name, params);
-                    self.fn_ids.insert(name, idx);
-                    self.fn_decls.push((idx, n.clone()));
+                    self.fn_ids.insert(self.qualify(&name), idx);
+                    self.fn_decls
+                        .push((idx, n.clone(), self.current_module.clone()));
                 }
                 K::TestDecl => {
                     let raw = n
                         .find_token(K::StrLit)
                         .map(|t| t.text.clone())
                         .unwrap_or_default();
-                    let name = spider_syntax::interpolation::plain_text(&raw);
+                    let mut name = spider_syntax::interpolation::plain_text(&raw);
+                    if self.current_module != "main" {
+                        name = format!("{}: {name}", self.current_module);
+                    }
                     let idx = self.reserve_proto(&format!("test {name}"), 0);
                     self.tests.push((name, idx));
-                    self.fn_decls.push((idx, n.clone()));
+                    self.fn_decls
+                        .push((idx, n.clone(), self.current_module.clone()));
                 }
                 K::RecordDecl => {
                     let name = ident_of(n).ok_or("record without a name")?;
@@ -313,9 +367,10 @@ impl Compiler {
         }
         fb.store(&mut self.protos[0]);
 
-        // Function bodies.
+        // Function bodies (from every module of the project).
         let decls = std::mem::take(&mut self.fn_decls);
-        for (idx, decl) in &decls {
+        for (idx, decl, module) in &decls {
+            self.current_module = module.clone();
             let n_params = self.protos[*idx as usize].n_params;
             let mut fb = Fb::new(n_params, false);
             if let Some(pl) = decl.find_node(K::ParamList) {
@@ -979,7 +1034,7 @@ impl Compiler {
                 return Ok(dst);
             }
         }
-        if let Some(&idx) = self.fn_ids.get(&name) {
+        if let Some(&idx) = self.fn_ids.get(&self.qualify(&name)) {
             let cidx = fb.const_val(Value::FnRef(idx));
             let dst = fb.reg();
             fb.code.push(Instr::LoadConst(dst, cidx));
@@ -1082,7 +1137,7 @@ impl Compiler {
                         return Ok(dst);
                     }
                 }
-                if let Some(&idx) = self.fn_ids.get(&name) {
+                if let Some(&idx) = self.fn_ids.get(&self.qualify(&name)) {
                     let dst = fb.reg();
                     fb.code.push(Instr::Call(dst, idx, args));
                     return Ok(dst);
@@ -1105,6 +1160,22 @@ impl Compiler {
             let cparts = exprs(callee);
             let base = cparts.first().ok_or("method call without a receiver")?;
             let method = ident_of(callee).ok_or("method call without a name")?;
+            // Sibling project module: alias.fn(...) -> direct call.
+            if base.kind == K::NameRef {
+                if let Some(alias) = ident_of(base) {
+                    if fb.lookup(&alias).is_none() {
+                        if let Some(target) = self.user_import(&alias).cloned() {
+                            let key = format!("{target}::{method}");
+                            let idx = *self.fn_ids.get(&key).ok_or_else(|| {
+                                format!("module `{alias}` has no compiled function `{method}`")
+                            })?;
+                            let dst = fb.reg();
+                            fb.code.push(Instr::Call(dst, idx, args));
+                            return Ok(dst);
+                        }
+                    }
+                }
+            }
             if let Some(mid) = self.module_of(fb, base) {
                 let cidx = fb.const_val(Value::text(method));
                 let dst = fb.reg();

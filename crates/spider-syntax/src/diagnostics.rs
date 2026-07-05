@@ -397,6 +397,11 @@ pub fn explain(code: &str) -> Option<Explain> {
             "constraints must be built-in (Comparable, Equatable, Printable) or a declared shape.",
             "check the spelling, or declare a shape with that name.",
         ),
+        "E0246" => (
+            "only the main file runs top-level code; this file is a module.",
+            "modules are boxes of definitions other files borrow from — if they also ran code on their own, importing a module could have surprise side effects.",
+            "move this code into a function, or into the project's main file.",
+        ),
         "E0244" => (
             "this module needs a capability the program was not given.",
             "Spider programs can only touch the outside world (files, network…) with capabilities declared up front — that's what keeps every Spider program and package safe to run.",
@@ -491,9 +496,9 @@ pub const ALL_CODES: &[&str] = &[
     "E0170", "E0201", "E0203", "E0204", "E0208", "E0209", "E0210", "E0211", "E0212", "E0213",
     "E0214", "E0215", "E0216", "E0217", "E0218", "E0219", "E0220", "E0221", "E0222", "E0223",
     "E0224", "E0225", "E0226", "E0227", "E0228", "E0229", "E0230", "E0231", "E0232", "E0233",
-    "E0234", "E0235", "E0236", "E0237", "E0240", "E0241", "E0242", "E0243", "E0244", "E0301",
-    "E0302", "E0303", "E0304", "E0305", "E0306", "E0307", "E0310", "E0311", "W0001", "W0002",
-    "W0003",
+    "E0234", "E0235", "E0236", "E0237", "E0240", "E0241", "E0242", "E0243", "E0244", "E0246",
+    "E0301", "E0302", "E0303", "E0304", "E0305", "E0306", "E0307", "E0310", "E0311", "W0001",
+    "W0002", "W0003",
 ];
 
 #[cfg(test)]

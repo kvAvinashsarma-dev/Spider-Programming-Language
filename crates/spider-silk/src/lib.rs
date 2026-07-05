@@ -8,7 +8,7 @@ pub mod compile;
 pub mod value;
 pub mod vm;
 
-pub use compile::{compile, Program};
+pub use compile::{compile, compile_project, ModuleSrc, Program};
 pub use value::{display, Value};
 pub use vm::{render_panic, CaptureIo, ConsoleIo, Io, RuntimeError, Vm};
 

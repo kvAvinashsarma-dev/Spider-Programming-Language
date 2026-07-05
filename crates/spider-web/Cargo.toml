@@ -1,17 +1,15 @@
 [package]
-name = "spider-cli"
-description = "The spider command-line tool"
+name = "spider-web"
+description = "Project services: module loading across files, and web — Spider's package manager"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "spider"
-path = "src/main.rs"
+name = "web"
+path = "src/bin/web.rs"
 
 [dependencies]
 spider-syntax = { path = "../spider-syntax" }
 spider-hir = { path = "../spider-hir" }
 spider-silk = { path = "../spider-silk" }
-spider-web = { path = "../spider-web" }
-spider-fmt = { path = "../spider-fmt" }
