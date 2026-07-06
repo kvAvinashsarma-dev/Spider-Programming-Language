@@ -4,7 +4,57 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 
-const VERSION: &str = "spider 0.1.0 (Milestone M4 \"Web-spinning\")";
+const VERSION: &str = "spider 0.1.0 (Silk VM)";
+
+/// Turns on ANSI colour on Windows terminals (cmd, PowerShell, Terminal).
+/// Declared inline so the toolchain keeps its zero-dependency rule.
+#[cfg(windows)]
+fn enable_ansi() {
+    extern "system" {
+        fn GetStdHandle(n: u32) -> *mut core::ffi::c_void;
+        fn GetConsoleMode(h: *mut core::ffi::c_void, m: *mut u32) -> i32;
+        fn SetConsoleMode(h: *mut core::ffi::c_void, m: u32) -> i32;
+    }
+    const STD_OUTPUT_HANDLE: u32 = 0xFFFF_FFF5; // (DWORD)-11
+    const ENABLE_VIRTUAL_TERMINAL_PROCESSING: u32 = 0x0004;
+    unsafe {
+        let h = GetStdHandle(STD_OUTPUT_HANDLE);
+        let mut mode = 0u32;
+        if GetConsoleMode(h, &mut mode) != 0 {
+            SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        }
+    }
+}
+
+#[cfg(not(windows))]
+fn enable_ansi() {}
+
+/// Wraps text in bold bright-red, unless NO_COLOR is set.
+fn red(s: &str) -> String {
+    if std::env::var_os("NO_COLOR").is_some() {
+        s.to_string()
+    } else {
+        format!("\x1b[1;91m{s}\x1b[0m")
+    }
+}
+
+/// The Spider banner: red block art, the tagline, and who built it.
+fn banner() {
+    enable_ansi();
+    let art = "\
+  ███████╗██████╗ ██╗██████╗ ███████╗██████╗
+  ██╔════╝██╔══██╗██║██╔══██╗██╔════╝██╔══██╗
+  ███████╗██████╔╝██║██║  ██║█████╗  ██████╔╝
+  ╚════██║██╔═══╝ ██║██║  ██║██╔══╝  ██╔══██╗
+  ███████║██║     ██║██████╔╝███████╗██║  ██║
+  ╚══════╝╚═╝     ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝";
+    println!();
+    println!("{}", red(art));
+    println!();
+    println!("{}", red("  Spider Programming Language"));
+    println!("{}", red("  Silk VM • v0.1.0"));
+    println!("{}", red("  Developed by Kv Avinash Sarma"));
+}
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -20,8 +70,8 @@ fn main() {
         Some("tree") => cmd_tree(&args[1..]),
         Some("tokens") => cmd_tokens(&args[1..]),
         Some("explain") => cmd_explain(&args[1..]),
-        Some("--version") | Some("-V") => {
-            println!("{VERSION}");
+        Some("--version") | Some("-V") | Some("banner") => {
+            banner();
             0
         }
         Some("help") | Some("--help") | Some("-h") | None => {
@@ -39,7 +89,7 @@ fn main() {
 }
 
 fn print_help() {
-    println!("{VERSION}");
+    banner();
     println!();
     println!("Usage: spider <command> [arguments]");
     println!();
