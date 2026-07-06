@@ -1,0 +1,9 @@
+[project]
+name = "HelloWorld"
+version = "0.1.0"
+spider = "0.1"
+
+[capabilities]
+allow = []
+
+[dependencies]

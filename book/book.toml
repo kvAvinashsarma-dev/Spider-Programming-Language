@@ -1,0 +1,17 @@
+[book]
+title = "The Spider Programming Language"
+authors = ["Spider founding engineering team"]
+description = "Official documentation for the Spider programming language, toolchain, Silk VM, and web package manager."
+language = "en"
+src = "src"
+
+[output.html]
+git-repository-url = "https://github.com/kvAvinashsarma-dev/Spider-Programming-Language"
+edit-url-template = "https://github.com/kvAvinashsarma-dev/Spider-Programming-Language/edit/main/book/{path}"
+site-url = "/Spider-Programming-Language/"
+
+[output.html.playground]
+editable = true
+copyable = true
+
+[preprocessor.links]

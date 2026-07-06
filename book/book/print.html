@@ -1,0 +1,1892 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Spider Programming Language</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Official documentation for the Spider programming language, toolchain, Silk VM, and web package manager.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-0392ca55.css">
+        <link rel="stylesheet" href="css/chrome-fc474251.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-82fdaa66.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-968e1df8.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Spider Programming Language</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="welcome"><a class="header" href="#welcome">Welcome</a></h1>
+<p>Spider is a programming language created by Kv Avinash Sarma with a simple surface and an industrial core.
+Its repository currently contains the parser, formatter, semantic checker,
+Silk bytecode VM, command-line tool, local package manager, LSP, browser
+playground facade, corpus examples, milestone notes, and website.</p>
+<p>This book is official documentation, not a marketing README. It documents what
+the implementation in this repository can parse, check, format, compile, and
+run today. When the roadmap and implementation disagree, this book follows the
+implementation and names the discrepancy.</p>
+<h2 id="a-first-program"><a class="header" href="#a-first-program">A First Program</a></h2>
+<pre><code class="language-spider">say "Hello, world!"
+
+let name = ask "What is your name?"
+say "Welcome, {name}!"
+</code></pre>
+<p><code>say</code> prints a value. <code>ask</code> prints a prompt and returns text typed by the user.
+String interpolation uses <code>{...}</code> holes parsed as Spider expressions, with one
+current limitation: text literals inside interpolation holes are not supported
+because interpolation is still scanned inside string tokens.</p>
+<h2 id="the-shape-of-spider-today"><a class="header" href="#the-shape-of-spider-today">The Shape of Spider Today</a></h2>
+<p>Spider files use the <code>.sp</code> extension. Blocks are indentation based. The
+formatter has no options. The parser is lossless and error tolerant. The
+checker performs name resolution, type checking, exhaustiveness checks, and
+capability checks. The compiler lowers checked programs to Silk bytecode. The
+VM executes with value semantics implemented by copy-on-write containers.</p>
+<h2 id="what-this-book-includes"><a class="header" href="#what-this-book-includes">What This Book Includes</a></h2>
+<p>This book includes a tutorial, language reference, standard-library reference,
+diagnostics guide, CLI reference, package-manager guide, compiler internals
+guide, VM bytecode reference, contributor guide, projects, cookbook, exercises,
+answers, and a validation report.</p>
+<h2 id="exercise"><a class="header" href="#exercise">Exercise</a></h2>
+<ol>
+<li>Write a file named <code>hello.sp</code> that asks for a name and prints a greeting.</li>
+<li>Run it with <code>spider run hello.sp</code>.</li>
+<li>Format it with <code>spider fmt hello.sp</code>.</li>
+</ol>
+<p>Answer:</p>
+<pre><code class="language-spider">let name = ask "Name?"
+say "Hello, {name}!"
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="project-status"><a class="header" href="#project-status">Project Status</a></h1>
+<p>The repository is versioned as <code>0.1.0</code> and contains milestones M1 through M5
+shipped, with M6 partially shipped.</p>
+<h2 id="implemented"><a class="header" href="#implemented">Implemented</a></h2>
+<ul>
+<li>Lossless lexer, parser, CST, typed AST views, and formatter.</li>
+<li>Semantic checker with name resolution, type inference, choices, records,
+generics, pattern matching, diagnostics, capabilities, and project modules.</li>
+<li>Silk register bytecode compiler and VM.</li>
+<li><code>spider run</code>, <code>spider test</code>, <code>spider new</code>, <code>spider repl</code>, <code>spider fmt</code>,
+<code>spider check</code>, <code>spider tree</code>, <code>spider tokens</code>, <code>spider explain</code>,
+<code>spider learn</code>, and <code>spider lsp</code>.</li>
+<li>Local <code>web</code> package manager with <code>install</code>, <code>publish</code>, <code>audit</code>, and <code>remove</code>.</li>
+<li>Safe Mode capability model for <code>fs</code>, <code>net</code>, <code>env</code>, <code>exec</code>, and <code>ai</code>, with
+<code>files</code> implemented behind <code>fs</code>.</li>
+<li>LSP diagnostics, hover, and completion.</li>
+</ul>
+<h2 id="not-implemented-yet"><a class="header" href="#not-implemented-yet">Not Implemented Yet</a></h2>
+<ul>
+<li><code>spider build</code> native compilation.</li>
+<li><code>spider doc</code>.</li>
+<li><code>spider package</code>.</li>
+<li>Public network registry, signing, namespaces, and transitive package
+dependency resolution.</li>
+<li>Full concurrency semantics. <code>do together</code> and <code>spawn</code> parse; runtime behavior
+is sequential until M7.</li>
+<li>AOT backend and WASM target as production outputs.</li>
+<li>Lexer-level interpolation tokens. Current interpolation is scanner based.</li>
+<li>Complete website documentation generated from this book.</li>
+</ul>
+<h2 id="source-of-truth"><a class="header" href="#source-of-truth">Source of Truth</a></h2>
+<p>The code paths used for this book are:</p>
+<ul>
+<li><code>crates/spider-syntax</code></li>
+<li><code>crates/spider-hir</code></li>
+<li><code>crates/spider-silk</code></li>
+<li><code>crates/spider-fmt</code></li>
+<li><code>crates/spider-web</code></li>
+<li><code>crates/spider-lsp</code></li>
+<li><code>crates/spider-playground</code></li>
+<li><code>crates/spider-cli</code></li>
+<li><code>corpus</code></li>
+<li><code>docs</code></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="vision-and-philosophy"><a class="header" href="#vision-and-philosophy">Vision and Philosophy</a></h1>
+<p>Spider’s thesis is that code can read plainly without becoming vague. It uses
+small, pronounceable keywords such as <code>say</code>, <code>ask</code>, <code>let</code>, <code>var</code>, <code>fn</code>, <code>match</code>,
+<code>repeat</code>, and <code>try</code>, but it is not natural-language programming. The grammar is
+deterministic and implemented by a recursive-descent parser.</p>
+<h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
+<p>Spider is designed for learners, educators, production engineers, and tools.
+The compiler tries to teach. Diagnostics include stable codes and explanation
+entries. The formatter removes style debate. Safe Mode makes ambient power
+visible by requiring explicit capabilities.</p>
+<h2 id="principles"><a class="header" href="#principles">Principles</a></h2>
+<ul>
+<li>One obvious spelling for common ideas.</li>
+<li>Readable syntax with strict semantics.</li>
+<li>Errors as a product surface.</li>
+<li>Safe by default, capable by declaration.</li>
+<li>Deterministic builds and deterministic runtime behavior where possible.</li>
+<li>Tooling is part of the language, not an afterthought.</li>
+</ul>
+<h2 id="history"><a class="header" href="#history">History</a></h2>
+<p>The repository records its early history through milestone notes:</p>
+<ul>
+<li>M1 Hatchling: syntax, parser, formatter.</li>
+<li>M2 Spinneret: HIR-style checking, inference, diagnostics.</li>
+<li>M3 Silk: bytecode compiler, VM, run, repl, new.</li>
+<li>M4 Web-spinning: stdlib registry, capabilities, tests.</li>
+<li>M5 First Thread: modules and local package manager.</li>
+<li>M6 Loom: partially shipped LSP and Learn Mode.</li>
+</ul>
+<h2 id="behind-the-scenes"><a class="header" href="#behind-the-scenes">Behind the Scenes</a></h2>
+<p>The parser is lossless: every token, including comments and whitespace, remains
+in the tree. That is why the formatter, LSP, and future refactoring tools can
+operate without destroying user context.</p>
+<h2 id="common-mistakes"><a class="header" href="#common-mistakes">Common Mistakes</a></h2>
+<ul>
+<li>Treating Spider as English. It is not; it only borrows readable words.</li>
+<li>Assuming roadmap features exist. The compiler decides what is real.</li>
+<li>Expecting invisible package permissions. Capabilities are explicit.</li>
+</ul>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ul>
+<li>Run <code>spider check</code> before <code>spider run</code> when learning.</li>
+<li>Prefer <code>let</code> until mutation is required.</li>
+<li>Keep public functions annotated.</li>
+<li>Use <code>Outcome</code> for expected failure and let panics represent bugs.</li>
+</ul>
+<h2 id="exercise-1"><a class="header" href="#exercise-1">Exercise</a></h2>
+<p>Explain why <code>say "hi"</code> is valid Spider but “print hi” is not.</p>
+<p>Answer: Spider has a fixed grammar. <code>say</code> is the implemented output keyword;
+free English commands are not parsed.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="spider-compared"><a class="header" href="#spider-compared">Spider Compared</a></h1>
+<p>This chapter compares Spider’s implemented design with familiar languages.</p>
+<h2 id="python"><a class="header" href="#python">Python</a></h2>
+<p>Spider shares indentation-based blocks and beginner-friendly readability with
+Python. Unlike Python, Spider is statically checked before execution and has
+explicit <code>Outcome</code> and <code>Maybe</code> values instead of exceptions and null.</p>
+<h2 id="rust"><a class="header" href="#rust">Rust</a></h2>
+<p>Spider shares safety ambitions with Rust but does not expose borrow checking in
+the current user surface. Value semantics are implemented in the VM with
+copy-on-write containers. Spider’s capability model is also part of the
+language and package toolchain.</p>
+<h2 id="go"><a class="header" href="#go">Go</a></h2>
+<p>Spider shares simple tooling and a preference for readable code with Go. Go’s
+current implementation has goroutines; Spider’s concurrency syntax exists but
+executes sequentially until M7.</p>
+<h2 id="java"><a class="header" href="#java">Java</a></h2>
+<p>Spider avoids mandatory classes for simple programs. It has records and choices
+today, not class inheritance.</p>
+<h2 id="c"><a class="header" href="#c">C#</a></h2>
+<p>C# has a broad industrial runtime and many language constructs. Spider is much
+smaller today. Its implemented surface favors few keywords, no nullable values,
+and deterministic package capability checks.</p>
+<h2 id="javascript"><a class="header" href="#javascript">JavaScript</a></h2>
+<p>Spider is not dynamically typed JavaScript. It checks names, types, module
+visibility, match exhaustiveness, and capabilities before running.</p>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Spider’s current identity is closest to “Python-like readability with a
+static checker, Rust-like honesty about safety, and a small integrated toolchain.”</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="installing-and-building"><a class="header" href="#installing-and-building">Installing and Building</a></h1>
+<p>Spider is currently built from source with Cargo.</p>
+<h2 id="requirements"><a class="header" href="#requirements">Requirements</a></h2>
+<ul>
+<li>Rust toolchain with Cargo.</li>
+<li>A terminal.</li>
+<li>This repository.</li>
+</ul>
+<h2 id="build"><a class="header" href="#build">Build</a></h2>
+<pre><code class="language-powershell">cargo build --workspace
+</code></pre>
+<p>The <code>spider</code> executable is produced under <code>target/debug/spider.exe</code> on Windows.
+The <code>web</code> package-manager executable is produced under <code>target/debug/web.exe</code>.</p>
+<h2 id="run-tests"><a class="header" href="#run-tests">Run Tests</a></h2>
+<pre><code class="language-powershell">cargo test --workspace
+</code></pre>
+<h2 id="path"><a class="header" href="#path">PATH</a></h2>
+<p>During development, either run the executable by path:</p>
+<pre><code class="language-powershell">.\target\debug\spider.exe --version
+</code></pre>
+<p>or add <code>target/debug</code> to your <code>PATH</code>.</p>
+<h2 id="updating"><a class="header" href="#updating">Updating</a></h2>
+<p>Pull the repository, then rebuild:</p>
+<pre><code class="language-powershell">git pull
+cargo build --workspace
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<p>If Cargo cannot find Rust, install the Rust toolchain. If <code>spider</code> is not found,
+check whether <code>target/debug</code> is on <code>PATH</code> or run the executable by full path.</p>
+<h2 id="exercise-2"><a class="header" href="#exercise-2">Exercise</a></h2>
+<p>Build the workspace and run <code>spider explain E0301</code>.</p>
+<p>Answer: <code>E0301</code> is the divide-by-zero runtime panic code.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="spider-cli"><a class="header" href="#spider-cli">Spider CLI</a></h1>
+<p>The <code>spider</code> command is implemented in <code>crates/spider-cli/src/main.rs</code>.</p>
+<h2 id="commands-implemented-today"><a class="header" href="#commands-implemented-today">Commands Implemented Today</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Command</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td>`spider run &lt;file.sp</td><td>project-dir&gt;`</td></tr>
+<tr><td><code>spider test [path]</code></td><td>Run every <code>test "..."</code> block under a path.</td></tr>
+<tr><td><code>spider new &lt;name&gt;</code></td><td>Create a project with <code>web.toml</code>, <code>src/main.sp</code>, and README.</td></tr>
+<tr><td><code>spider repl [--allow cap]</code></td><td>Interactive Spider session.</td></tr>
+<tr><td><code>spider fmt &lt;paths...&gt;</code></td><td>Format <code>.sp</code> files in place.</td></tr>
+<tr><td><code>spider fmt --check &lt;paths...&gt;</code></td><td>Report files that would be reformatted.</td></tr>
+<tr><td><code>spider check &lt;file.sp&gt;</code></td><td>Parse, resolve, type-check, and explain problems.</td></tr>
+<tr><td><code>spider tree &lt;file.sp&gt;</code></td><td>Print the syntax tree for debugging.</td></tr>
+<tr><td><code>spider tokens &lt;file.sp&gt;</code></td><td>Print the token stream for debugging.</td></tr>
+<tr><td><code>spider explain &lt;CODE&gt;</code></td><td>Print an explanation for a diagnostic code.</td></tr>
+<tr><td><code>spider learn &lt;file.sp&gt;</code></td><td>List concepts used by a file.</td></tr>
+<tr><td><code>spider lsp</code></td><td>Run the language server over stdio.</td></tr>
+<tr><td><code>spider --version</code></td><td>Show the toolchain version.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="safe-mode"><a class="header" href="#safe-mode">Safe Mode</a></h2>
+<p>Programs start with zero capabilities. Use <code>web.toml</code> or <code>--allow</code> to grant a
+capability for a run:</p>
+<pre><code class="language-powershell">spider run --allow fs script.sp
+spider repl --allow fs
+</code></pre>
+<p>Known capability names are <code>fs</code>, <code>net</code>, <code>env</code>, <code>exec</code>, and <code>ai</code>. Only <code>fs</code> has
+implemented standard-library operations today, through the <code>files</code> module.</p>
+<h2 id="roadmap-commands-not-implemented"><a class="header" href="#roadmap-commands-not-implemented">Roadmap Commands Not Implemented</a></h2>
+<p>The public roadmap mentions <code>spider build</code>, <code>spider doc</code>, and package-oriented
+commands. In this repository:</p>
+<ul>
+<li><code>spider build</code> is explicitly reported as coming later.</li>
+<li><code>spider doc</code> is not implemented.</li>
+<li>Package operations live in the separate <code>web</code> executable.</li>
+</ul>
+<h2 id="common-mistakes-1"><a class="header" href="#common-mistakes-1">Common Mistakes</a></h2>
+<ul>
+<li>Running <code>spider check src</code> currently expects a file path, not a whole source
+directory.</li>
+<li>Running file I/O without <code>--allow fs</code> or a manifest grant produces E0244 at
+check time or E0310 at runtime.</li>
+</ul>
+<h2 id="exercise-3"><a class="header" href="#exercise-3">Exercise</a></h2>
+<p>Create a project and run it.</p>
+<p>Answer:</p>
+<pre><code class="language-powershell">spider new hello-spider
+cd hello-spider
+spider run .
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="web-package-manager"><a class="header" href="#web-package-manager">web Package Manager</a></h1>
+<p><code>web</code> is Spider’s package manager. The current implementation is an M5 local
+registry, not a public network registry.</p>
+<h2 id="commands"><a class="header" href="#commands">Commands</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Command</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>web install &lt;name&gt;</code></td><td>Install latest local-registry version into <code>web_modules</code>.</td></tr>
+<tr><td><code>web publish</code></td><td>Publish the current project to the local registry.</td></tr>
+<tr><td><code>web audit</code></td><td>Check installed packages, capabilities, and fingerprints.</td></tr>
+<tr><td><code>web remove &lt;name&gt;</code></td><td>Remove an installed package and lockfile entry.</td></tr>
+<tr><td><code>web --version</code></td><td>Show the package manager version.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="manifest"><a class="header" href="#manifest">Manifest</a></h2>
+<p><code>web.toml</code> records project metadata, capabilities, and dependencies:</p>
+<pre><code class="language-toml">[project]
+name = "demo"
+version = "0.1.0"
+spider = "0.1"
+
+[capabilities]
+allow = []
+
+[dependencies]
+</code></pre>
+<h2 id="capability-diffing"><a class="header" href="#capability-diffing">Capability Diffing</a></h2>
+<p>Installation refuses a package whose capabilities exceed the project allow-list.
+This is the security center of M5. A dependency that wants <code>fs</code> cannot be
+installed into a project whose manifest allows no capabilities.</p>
+<h2 id="lockfile"><a class="header" href="#lockfile">Lockfile</a></h2>
+<p><code>web.lock</code> records exact package versions and deterministic FNV-64 content
+fingerprints. The fingerprint is an integrity check for local tampering, not a
+cryptographic signature.</p>
+<h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
+<ul>
+<li>Registry is local: <code>~/.spider/registry</code> or <code>SPIDER_REGISTRY</code>.</li>
+<li>Published versions are immutable.</li>
+<li>Transitive package dependencies are not resolved.</li>
+<li>Public registry, signing, namespace ownership, semver enforcement, and
+vulnerability feeds are future work.</li>
+</ul>
+<h2 id="exercise-4"><a class="header" href="#exercise-4">Exercise</a></h2>
+<p>Why are install scripts omitted?</p>
+<p>Answer: Spider’s package model treats packages as data. Arbitrary install-time
+code would undermine deterministic builds and capability security.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="lsp-and-learn-mode"><a class="header" href="#lsp-and-learn-mode">LSP and Learn Mode</a></h1>
+<p>M6 partially shipped <code>spider lsp</code> and <code>spider learn</code>.</p>
+<h2 id="language-server"><a class="header" href="#language-server">Language Server</a></h2>
+<p>The LSP server communicates over stdio with Content-Length framing. It supports:</p>
+<ul>
+<li>initialize/shutdown lifecycle;</li>
+<li>diagnostics on open and change;</li>
+<li>keyword and stdlib hover text;</li>
+<li>keyword and stdlib completion.</li>
+</ul>
+<p>It intentionally reuses the same parsing and checking pipeline as <code>spider check</code>, so editor diagnostics match terminal diagnostics.</p>
+<h2 id="learn-mode"><a class="header" href="#learn-mode">Learn Mode</a></h2>
+<p><code>spider learn file.sp</code> scans a file and lists concepts it uses. The concept
+database also powers LSP keyword hovers.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><code class="language-powershell">spider learn corpus\run\loops.sp
+</code></pre>
+<h2 id="limitations-1"><a class="header" href="#limitations-1">Limitations</a></h2>
+<ul>
+<li>Cross-file LSP project checking is not complete.</li>
+<li>Kids Mode is not implemented as a separate mode.</li>
+<li>In-string completions wait on lexer-level interpolation tokens.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="lexical-structure"><a class="header" href="#lexical-structure">Lexical Structure</a></h1>
+<p>Spider source is UTF-8 text in <code>.sp</code> files. The current lexer accepts ASCII
+identifiers beginning with a letter or <code>_</code>, followed by letters, digits, or <code>_</code>.</p>
+<h2 id="comments"><a class="header" href="#comments">Comments</a></h2>
+<pre><code class="language-spider"># A normal comment.
+## A documentation comment.
+</code></pre>
+<h2 id="strings"><a class="header" href="#strings">Strings</a></h2>
+<pre><code class="language-spider">let greeting = "Hello"
+let message = "Hello, {name}!"
+</code></pre>
+<p>Escapes supported by the interpolation scanner include <code>\n</code>, <code>\t</code>, <code>\"</code>, <code>\\</code>,
+<code>\{</code>, and <code>\}</code>.</p>
+<h2 id="numbers"><a class="header" href="#numbers">Numbers</a></h2>
+<pre><code class="language-spider">let whole = 1_000_000
+let decimal = 3.14
+let tiny = 2.5e-3
+let negative = -42
+</code></pre>
+<p><code>Int</code> is 64-bit checked. <code>Float</code> follows IEEE behavior and does not panic for
+divide-by-zero.</p>
+<h2 id="indentation"><a class="header" href="#indentation">Indentation</a></h2>
+<p>Blocks are indentation based. Tabs in indentation produce E0001. Indentation
+must line up with an earlier indentation level.</p>
+<pre><code class="language-spider">if true
+    say "indented"
+</code></pre>
+<h2 id="soft-keywords"><a class="header" href="#soft-keywords">Soft Keywords</a></h2>
+<p><code>record</code>, <code>choice</code>, <code>shape</code>, <code>test</code>, <code>times</code>, <code>together</code>, and <code>where</code> are
+contextual. They can be names when a name is expected:</p>
+<pre><code class="language-spider">let times = 3
+repeat times times
+    say "again"
+</code></pre>
+<p>Hard structural words such as <code>let</code>, <code>var</code>, <code>fn</code>, <code>if</code>, <code>else</code>, <code>for</code>, <code>while</code>,
+<code>match</code>, <code>try</code>, <code>use</code>, <code>return</code>, <code>say</code>, <code>ask</code>, <code>spawn</code>, <code>do</code>, <code>and</code>, <code>or</code>,
+<code>not</code>, <code>true</code>, <code>false</code>, <code>public</code>, <code>to</code>, <code>of</code>, <code>is</code>, and <code>in</code> are reserved.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="values-variables-and-types"><a class="header" href="#values-variables-and-types">Values, Variables, and Types</a></h1>
+<p>Spider has immutable bindings, mutable variables, primitive values, collections,
+records, choices, and typed failure values.</p>
+<h2 id="bindings"><a class="header" href="#bindings">Bindings</a></h2>
+<pre><code class="language-spider">let pi = 3.14159
+var score = 0
+score += 5
+</code></pre>
+<p>Use <code>let</code> by default. Use <code>var</code> only when the name must be reassigned or
+mutated.</p>
+<h2 id="type-annotations"><a class="header" href="#type-annotations">Type Annotations</a></h2>
+<pre><code class="language-spider">let title: Text = "Spider"
+let scores: List of Int = [90, 85, 77]
+let ages: Map of Text to Int = {"Ada": 12, "Lin": 11}
+</code></pre>
+<p>The checker infers local <code>let</code> types. Public function boundaries must be
+annotated.</p>
+<h2 id="primitive-types"><a class="header" href="#primitive-types">Primitive Types</a></h2>
+<ul>
+<li><code>Int</code></li>
+<li><code>Float</code></li>
+<li><code>Bool</code></li>
+<li><code>Text</code></li>
+<li><code>Nothing</code></li>
+</ul>
+<h2 id="generic-types"><a class="header" href="#generic-types">Generic Types</a></h2>
+<pre><code class="language-spider">List of Int
+Map of Text to Int
+Maybe of Text
+Outcome of Int
+</code></pre>
+<h2 id="value-semantics"><a class="header" href="#value-semantics">Value Semantics</a></h2>
+<p>Assignment behaves like a copy. The VM implements this with copy-on-write.</p>
+<pre><code class="language-spider">var a = [1, 2]
+var b = a
+b.push(3)
+say a
+say b
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">[1, 2]
+[1, 2, 3]
+</code></pre>
+<h2 id="common-mistakes-2"><a class="header" href="#common-mistakes-2">Common Mistakes</a></h2>
+<ul>
+<li>Assigning to a <code>let</code> binding.</li>
+<li>Mixing <code>Int</code> and <code>Float</code> without conversion.</li>
+<li>Leaving public function parameters unannotated.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="expressions-and-operators"><a class="header" href="#expressions-and-operators">Expressions and Operators</a></h1>
+<h2 id="arithmetic"><a class="header" href="#arithmetic">Arithmetic</a></h2>
+<pre><code class="language-spider">say 1 + 2 * 3
+say (1 + 2) * 3
+say 10 / 2
+say 10 % 3
+</code></pre>
+<p>Integer divide-by-zero panics with E0301. Integer overflow panics with E0302.</p>
+<h2 id="comparison-and-logic"><a class="header" href="#comparison-and-logic">Comparison and Logic</a></h2>
+<pre><code class="language-spider">if age &gt; 3 and age &lt; 13 or not false
+    say "boolean logic reads like a sentence"
+</code></pre>
+<p>Comparison operators are <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, and <code>&gt;=</code>.</p>
+<h2 id="calls"><a class="header" href="#calls">Calls</a></h2>
+<pre><code class="language-spider">say area(3.0, 4.0)
+say "hello".upper()
+say [3, 1, 2].sort()
+</code></pre>
+<p>User functions and methods use parentheses. The built-in <code>say</code> and <code>ask</code> forms
+are prefix forms.</p>
+<h2 id="indexing-and-assignment"><a class="header" href="#indexing-and-assignment">Indexing and Assignment</a></h2>
+<pre><code class="language-spider">var scores = [90, 85]
+scores[1] = 100
+
+var ages = {"Ada": 12}
+ages["Sam"] = 13
+</code></pre>
+<p>List indexes outside range panic with E0303. Missing map keys panic with E0304.</p>
+<h2 id="ranges"><a class="header" href="#ranges">Ranges</a></h2>
+<pre><code class="language-spider">for i in 1 to 10
+    say i
+</code></pre>
+<p><code>to</code> forms an inclusive range in current loop behavior.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="control-flow"><a class="header" href="#control-flow">Control Flow</a></h1>
+<h2 id="if-and-else"><a class="header" href="#if-and-else">if and else</a></h2>
+<pre><code class="language-spider">if age &gt;= 13
+    say "Teenager or older"
+else if age &gt;= 3
+    say "Kid"
+else
+    say "Toddler"
+</code></pre>
+<p>Conditions must be <code>Bool</code>.</p>
+<h2 id="while"><a class="header" href="#while">while</a></h2>
+<pre><code class="language-spider">var lives = 3
+while lives &gt; 0
+    say lives
+    lives -= 1
+</code></pre>
+<h2 id="for"><a class="header" href="#for">for</a></h2>
+<pre><code class="language-spider">for i in 1 to 3
+    say i
+
+for item in [1, 2, 3]
+    say item * 2
+</code></pre>
+<h2 id="repeat"><a class="header" href="#repeat">repeat</a></h2>
+<pre><code class="language-spider">repeat 3 times
+    say "Hip hip hooray!"
+</code></pre>
+<p>The expression before <code>times</code> must be an <code>Int</code>.</p>
+<h2 id="match"><a class="header" href="#match">match</a></h2>
+<pre><code class="language-spider">match parse_age("")
+    Ok(value) -&gt; say value
+    Fail(problem) -&gt; say "could not parse: {problem}"
+</code></pre>
+<p>The checker performs exhaustiveness checks for choices, <code>Maybe</code>, <code>Outcome</code>, and
+<code>Bool</code>.</p>
+<h2 id="return"><a class="header" href="#return">return</a></h2>
+<pre><code class="language-spider">fn double(n: Int) -&gt; Int
+    return n * 2
+</code></pre>
+<p>Functions with non-<code>Nothing</code> return types may also end with a trailing
+expression.</p>
+<h2 id="not-implemented"><a class="header" href="#not-implemented">Not Implemented</a></h2>
+<p>There is no implemented <code>break</code> or <code>continue</code> command in the current grammar.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="functions"><a class="header" href="#functions">Functions</a></h1>
+<h2 id="declaration"><a class="header" href="#declaration">Declaration</a></h2>
+<pre><code class="language-spider">fn greet(name: Text)
+    say "Hello, {name}!"
+</code></pre>
+<h2 id="return-types"><a class="header" href="#return-types">Return Types</a></h2>
+<pre><code class="language-spider">fn area(width: Float, height: Float) -&gt; Float
+    return width * height
+</code></pre>
+<h2 id="public-functions"><a class="header" href="#public-functions">Public Functions</a></h2>
+<pre><code class="language-spider">public fn total(prices: List of Float) -&gt; Float
+    var sum = 0.0
+    for price in prices
+        sum += price
+    return sum
+</code></pre>
+<p>Public functions cross module boundaries. Public parameters must have
+annotations.</p>
+<h2 id="generics"><a class="header" href="#generics">Generics</a></h2>
+<pre><code class="language-spider">fn largest(items: List of T) -&gt; Maybe of T where T is Comparable
+    return items.first()
+</code></pre>
+<p>Implemented built-in constraints are <code>Comparable</code>, <code>Equatable</code>, and
+<code>Printable</code>.</p>
+<h2 id="recursion"><a class="header" href="#recursion">Recursion</a></h2>
+<pre><code class="language-spider">fn fib(n: Int) -&gt; Int
+    if n &lt; 2
+        return n
+    return fib(n - 1) + fib(n - 2)
+</code></pre>
+<p>The VM uses explicit frames. Recursion is limited to 1000 calls and reports
+E0307 when exceeded.</p>
+<h2 id="closures"><a class="header" href="#closures">Closures</a></h2>
+<p>Closures and anonymous functions are not implemented in the current grammar.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="records-choices-and-patterns"><a class="header" href="#records-choices-and-patterns">Records, Choices, and Patterns</a></h1>
+<h2 id="records"><a class="header" href="#records">Records</a></h2>
+<pre><code class="language-spider">record Point
+    x: Float
+    y: Float
+
+let p = Point(3.0, 4.0)
+say p.x
+</code></pre>
+<p>Records are constructed with call syntax. Fields are accessed with dot syntax.</p>
+<h2 id="choices"><a class="header" href="#choices">Choices</a></h2>
+<pre><code class="language-spider">choice Shape
+    Circle(radius: Float)
+    Rect(width: Float, height: Float)
+    Dot
+</code></pre>
+<p>Choices are tagged alternatives. Constructors also use call syntax when they
+carry fields.</p>
+<h2 id="pattern-matching"><a class="header" href="#pattern-matching">Pattern Matching</a></h2>
+<pre><code class="language-spider">fn area(shape: Shape) -&gt; Float
+    match shape
+        Circle(r) -&gt; 3.14159 * r * r
+        Rect(w, h) -&gt; w * h
+        Dot -&gt; 0.0
+</code></pre>
+<p>Patterns can match variant tags and bind fields. <code>_</code> is the wildcard pattern.</p>
+<h2 id="maybe-and-outcome"><a class="header" href="#maybe-and-outcome">Maybe and Outcome</a></h2>
+<pre><code class="language-spider">match maybe_name
+    Some(name) -&gt; say name
+    None -&gt; say "missing"
+
+match result
+    Ok(value) -&gt; say value
+    Fail(problem) -&gt; say problem
+</code></pre>
+<h2 id="shapes"><a class="header" href="#shapes">Shapes</a></h2>
+<p><code>shape</code> declarations parse and format. Full interface/trait semantics are not
+implemented yet.</p>
+<h2 id="common-mistakes-3"><a class="header" href="#common-mistakes-3">Common Mistakes</a></h2>
+<ul>
+<li>Omitting a case in <code>match</code>.</li>
+<li>Using a case name that does not belong to the choice.</li>
+<li>Giving a pattern the wrong number of fields.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="collections-and-outcomes"><a class="header" href="#collections-and-outcomes">Collections and Outcomes</a></h1>
+<h2 id="lists"><a class="header" href="#lists">Lists</a></h2>
+<pre><code class="language-spider">let names = ["Ada", "Grace", "Alan"]
+say names[0]
+say names.length()
+say names.first()
+</code></pre>
+<p>Lists support <code>length</code>, <code>first</code>, <code>last</code>, <code>sort</code>, <code>reverse</code>, <code>push</code>, and
+<code>contains</code>.</p>
+<h2 id="maps"><a class="header" href="#maps">Maps</a></h2>
+<pre><code class="language-spider">let ages = {"Ada": 12, "Lin": 11}
+say ages["Ada"]
+say ages.keys()
+say ages.has("Lin")
+</code></pre>
+<p>Maps preserve insertion order in the VM.</p>
+<h2 id="maybe"><a class="header" href="#maybe">Maybe</a></h2>
+<p><code>Maybe of T</code> is either <code>Some(T)</code> or <code>None</code>.</p>
+<pre><code class="language-spider">match [1, 2].first()
+    Some(value) -&gt; say value
+    None -&gt; say "empty"
+</code></pre>
+<h2 id="outcome"><a class="header" href="#outcome">Outcome</a></h2>
+<p><code>Outcome of T</code> is either <code>Ok(T)</code> or <code>Fail(Text-like problem)</code>.</p>
+<pre><code class="language-spider">fn parse_grade(score: Int) -&gt; Outcome of Text
+    if score &lt; 0
+        return Fail("scores start at zero")
+    return Ok("pass")
+</code></pre>
+<h2 id="try"><a class="header" href="#try">try</a></h2>
+<pre><code class="language-spider">let fallback = try parse_grade(-1) else "?"
+</code></pre>
+<p>Bare <code>try</code> inside an <code>Outcome</code>-returning function propagates failure. A bare
+<code>try</code> on <code>Maybe</code> propagates <code>Fail("the value was missing")</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="modules-and-packages"><a class="header" href="#modules-and-packages">Modules and Packages</a></h1>
+<h2 id="imports"><a class="header" href="#imports">Imports</a></h2>
+<pre><code class="language-spider">use math
+use helpers
+use shop.cart
+</code></pre>
+<p>Stdlib imports always win. User imports load files:</p>
+<ul>
+<li><code>use helpers</code> maps to <code>src/helpers.sp</code> in a project or sibling <code>helpers.sp</code>
+for scripts.</li>
+<li><code>use shop.cart</code> maps to <code>src/shop/cart.sp</code>.</li>
+<li><code>use package_name</code> can load <code>web_modules/package_name/src/lib.sp</code>.</li>
+</ul>
+<h2 id="visibility"><a class="header" href="#visibility">Visibility</a></h2>
+<p>Functions cross file boundaries only when declared <code>public</code>.</p>
+<pre><code class="language-spider">public fn greet(name: Text)
+    say "Hello, {name}!"
+</code></pre>
+<p>Private functions remain local to their module.</p>
+<h2 id="side-effects"><a class="header" href="#side-effects">Side Effects</a></h2>
+<p>Only the entry file runs top-level code. Imported modules are side-effect-free.
+If a module contains top-level executable statements, the project checker
+reports E0246.</p>
+<h2 id="cycles"><a class="header" href="#cycles">Cycles</a></h2>
+<p>Import cycles are errors and include the cycle path.</p>
+<h2 id="limitations-2"><a class="header" href="#limitations-2">Limitations</a></h2>
+<ul>
+<li>Types are project-global.</li>
+<li>Variant names share one global namespace.</li>
+<li>Transitive package dependencies are not resolved.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="testing"><a class="header" href="#testing">Testing</a></h1>
+<p>Spider has built-in test blocks.</p>
+<pre><code class="language-spider">test "adding works"
+    let result = 1 + 1
+    expect(result, 2)
+</code></pre>
+<p>Run tests with:</p>
+<pre><code class="language-powershell">spider test .
+</code></pre>
+<p>Each test runs on a fresh VM. Tests cannot depend on state from another test.
+<code>expect(actual, expected)</code> stops the test with E0311 if values differ.</p>
+<p><code>test</code> blocks do not run under <code>spider run</code>.</p>
+<h2 id="best-practices-1"><a class="header" href="#best-practices-1">Best Practices</a></h2>
+<ul>
+<li>Keep tests beside the code they describe.</li>
+<li>Use deterministic inputs.</li>
+<li>Use <code>random.seed</code> when testing random behavior.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="concurrency-surface"><a class="header" href="#concurrency-surface">Concurrency Surface</a></h1>
+<p>The parser accepts:</p>
+<pre><code class="language-spider">do together
+    let weather = fetch_weather("Tokyo")
+    let news = fetch_headlines()
+
+spawn worker(jobs)
+</code></pre>
+<p>Current behavior is deliberately limited. M3 records that concurrency constructs
+execute sequentially until M7, and the checker warns honestly with W0003.</p>
+<p>Do not write production Spider code that relies on parallel execution yet.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="standard-library-reference"><a class="header" href="#standard-library-reference">Standard Library Reference</a></h1>
+<p>The standard library registry is <code>spider_hir::stdlib</code>. It is the single source
+of truth for signatures, docs, checker behavior, VM dispatch, and doc coverage.</p>
+<h2 id="capabilities"><a class="header" href="#capabilities">Capabilities</a></h2>
+<p>Known capability names:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Capability</th><th>Meaning</th><th>Implemented module today</th></tr>
+</thead>
+<tbody>
+<tr><td><code>fs</code></td><td>Filesystem access.</td><td><code>files</code></td></tr>
+<tr><td><code>net</code></td><td>Network access.</td><td>reserved</td></tr>
+<tr><td><code>env</code></td><td>Environment access.</td><td>reserved</td></tr>
+<tr><td><code>exec</code></td><td>Process execution.</td><td>reserved</td></tr>
+<tr><td><code>ai</code></td><td>AI provider access.</td><td>reserved</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="modules"><a class="header" href="#modules">Modules</a></h2>
+<h3 id="math"><a class="header" href="#math">math</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Member</th><th>Signature</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>math.sqrt</code></td><td><code>Float -&gt; Float</code></td><td>Square root.</td></tr>
+<tr><td><code>math.pow</code></td><td><code>Float, Float -&gt; Float</code></td><td>Power.</td></tr>
+<tr><td><code>math.abs</code></td><td><code>T -&gt; T</code></td><td>Distance from zero.</td></tr>
+<tr><td><code>math.min</code></td><td><code>T, T -&gt; T</code></td><td>Smaller comparable value.</td></tr>
+<tr><td><code>math.max</code></td><td><code>T, T -&gt; T</code></td><td>Larger comparable value.</td></tr>
+<tr><td><code>math.floor</code></td><td><code>Float -&gt; Int</code></td><td>Round down.</td></tr>
+<tr><td><code>math.round</code></td><td><code>Float -&gt; Int</code></td><td>Round to nearest whole number.</td></tr>
+<tr><td><code>math.pi</code></td><td><code>Float</code></td><td>Circle constant.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="random"><a class="header" href="#random">random</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Member</th><th>Signature</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>random.seed</code></td><td><code>Int -&gt; Nothing</code></td><td>Set deterministic sequence seed.</td></tr>
+<tr><td><code>random.int</code></td><td><code>Int, Int -&gt; Int</code></td><td>Random integer between inclusive bounds.</td></tr>
+<tr><td><code>random.float</code></td><td><code>() -&gt; Float</code></td><td>Random float in <code>[0, 1)</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="files"><a class="header" href="#files">files</a></h3>
+<p>Requires <code>fs</code>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Member</th><th>Signature</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>files.read_text</code></td><td><code>Text -&gt; Outcome of Text</code></td><td>Read a file.</td></tr>
+<tr><td><code>files.write_text</code></td><td><code>Text, Text -&gt; Outcome of Bool</code></td><td>Write a file.</td></tr>
+<tr><td><code>files.exists</code></td><td><code>Text -&gt; Bool</code></td><td>Test path existence.</td></tr>
+<tr><td><code>files.list</code></td><td><code>Text -&gt; Outcome of List of Text</code></td><td>List directory names, sorted.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="methods"><a class="header" href="#methods">Methods</a></h2>
+<h3 id="int"><a class="header" href="#int">Int</a></h3>
+<ul>
+<li><code>to_float() -&gt; Float</code></li>
+<li><code>abs() -&gt; Int</code></li>
+</ul>
+<h3 id="float"><a class="header" href="#float">Float</a></h3>
+<ul>
+<li><code>to_int() -&gt; Int</code></li>
+<li><code>round() -&gt; Int</code></li>
+<li><code>floor() -&gt; Int</code></li>
+<li><code>abs() -&gt; Float</code></li>
+</ul>
+<h3 id="text"><a class="header" href="#text">Text</a></h3>
+<ul>
+<li><code>length() -&gt; Int</code></li>
+<li><code>upper() -&gt; Text</code></li>
+<li><code>lower() -&gt; Text</code></li>
+<li><code>trim() -&gt; Text</code></li>
+<li><code>contains(Text) -&gt; Bool</code></li>
+<li><code>split(Text) -&gt; List of Text</code></li>
+</ul>
+<h3 id="list"><a class="header" href="#list">List</a></h3>
+<ul>
+<li><code>length() -&gt; Int</code></li>
+<li><code>first() -&gt; Maybe of T</code></li>
+<li><code>last() -&gt; Maybe of T</code></li>
+<li><code>sort() -&gt; List of T</code></li>
+<li><code>reverse() -&gt; List of T</code></li>
+<li><code>push(T) -&gt; Nothing</code></li>
+<li><code>contains(T) -&gt; Bool</code></li>
+</ul>
+<h3 id="map"><a class="header" href="#map">Map</a></h3>
+<ul>
+<li><code>length() -&gt; Int</code></li>
+<li><code>keys() -&gt; List of K</code></li>
+<li><code>values() -&gt; List of V</code></li>
+<li><code>has(K) -&gt; Bool</code></li>
+</ul>
+<h2 id="builtins"><a class="header" href="#builtins">Builtins</a></h2>
+<p><code>expect(actual, expected)</code> is available everywhere. It is intended for
+<code>spider test</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="diagnostics-reference"><a class="header" href="#diagnostics-reference">Diagnostics Reference</a></h1>
+<p>Spider diagnostics have stable codes. The implementation includes authored
+explanations in <code>spider_syntax::diagnostics</code>.</p>
+<h2 id="syntax-diagnostics"><a class="header" href="#syntax-diagnostics">Syntax Diagnostics</a></h2>
+<p>Examples include:</p>
+<ul>
+<li>E0001: tabs in indentation.</li>
+<li>E0002: unexpected character.</li>
+<li>E0003: unterminated text literal.</li>
+<li>E0004: indentation does not line up.</li>
+<li>E0110: expected a value.</li>
+<li>E0115: expected a specific syntax kind.</li>
+<li>E0120: expected expression to end.</li>
+<li>E0150: nesting too deep.</li>
+</ul>
+<h2 id="semantic-diagnostics"><a class="header" href="#semantic-diagnostics">Semantic Diagnostics</a></h2>
+<p>Examples include:</p>
+<ul>
+<li>unknown names and did-you-mean suggestions;</li>
+<li>duplicate names;</li>
+<li>assigning through immutable bindings;</li>
+<li>type mismatches;</li>
+<li>non-<code>Bool</code> conditions;</li>
+<li>non-exhaustive <code>match</code>;</li>
+<li>wrong pattern arity;</li>
+<li>invalid <code>try</code>;</li>
+<li>missing capability E0244;</li>
+<li>imported module top-level side effect E0246.</li>
+</ul>
+<h2 id="runtime-panics"><a class="header" href="#runtime-panics">Runtime Panics</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Code</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>E0301</td><td>Integer divide by zero.</td></tr>
+<tr><td>E0302</td><td>Integer overflow.</td></tr>
+<tr><td>E0303</td><td>List position out of range.</td></tr>
+<tr><td>E0304</td><td>Missing map key.</td></tr>
+<tr><td>E0305</td><td>Sorting values with no ordering.</td></tr>
+<tr><td>E0306</td><td>Unknown module member at runtime defense layer.</td></tr>
+<tr><td>E0307</td><td>Recursion limit exceeded.</td></tr>
+<tr><td>E0310</td><td>Runtime capability denied.</td></tr>
+<tr><td>E0311</td><td><code>expect</code> failed.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="using-explain"><a class="header" href="#using-explain">Using explain</a></h2>
+<pre><code class="language-powershell">spider explain E0303
+</code></pre>
+<h2 id="best-practices-2"><a class="header" href="#best-practices-2">Best Practices</a></h2>
+<ul>
+<li>Treat diagnostics as part of the language.</li>
+<li>Prefer one root error over cascades.</li>
+<li>Use suggestions only when they point to valid code.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="language-reference"><a class="header" href="#language-reference">Language Reference</a></h1>
+<p>This chapter collects the implemented user-facing grammar in reference form.</p>
+<h2 id="top-level-forms"><a class="header" href="#top-level-forms">Top-Level Forms</a></h2>
+<pre><code class="language-text">use path
+record Name
+choice Name
+shape Name
+fn name(params) -&gt; Type
+public fn name(params) -&gt; Type
+test "name"
+statement
+</code></pre>
+<h2 id="statements"><a class="header" href="#statements">Statements</a></h2>
+<pre><code class="language-text">let name [: Type] = expr
+var name [: Type] = expr
+target = expr
+target += expr
+target -= expr
+target *= expr
+target /= expr
+say expr
+return [expr]
+if expr block [else ...]
+for name in expr block
+while expr block
+repeat expr times block
+match expr arms
+do together block
+spawn expr
+expr
+</code></pre>
+<p><code>break</code> and <code>continue</code> are not implemented.</p>
+<h2 id="types"><a class="header" href="#types">Types</a></h2>
+<pre><code class="language-text">Int
+Float
+Bool
+Text
+Nothing
+List of T
+Map of K to V
+Maybe of T
+Outcome of T
+RecordName
+ChoiceName
+</code></pre>
+<h2 id="expressions"><a class="header" href="#expressions">Expressions</a></h2>
+<p>Expressions include literals, names, calls, method calls, field access,
+indexing, lists, maps, ranges, unary operators, binary operators, <code>ask</code>,
+<code>try</code>, and <code>match</code> as value expression where arm results agree.</p>
+<h2 id="operator-precedence"><a class="header" href="#operator-precedence">Operator Precedence</a></h2>
+<p>From tightest to loosest:</p>
+<ol>
+<li>call, method call, indexing, field access</li>
+<li>unary <code>-</code></li>
+<li><code>*</code>, <code>/</code>, <code>%</code></li>
+<li><code>+</code>, <code>-</code></li>
+<li><code>to</code></li>
+<li>comparisons</li>
+<li><code>not</code></li>
+<li><code>and</code></li>
+<li><code>or</code></li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="cli-reference"><a class="header" href="#cli-reference">CLI Reference</a></h1>
+<h2 id="spider"><a class="header" href="#spider">spider</a></h2>
+<pre><code class="language-text">spider run [--allow cap[,cap]] &lt;file.sp|project-dir&gt;
+spider test [--allow cap[,cap]] [path]
+spider new &lt;name&gt;
+spider repl [--allow cap[,cap]]
+spider fmt [--check] &lt;paths...&gt;
+spider check &lt;file.sp&gt;
+spider tree &lt;file.sp&gt;
+spider tokens &lt;file.sp&gt;
+spider explain &lt;CODE&gt;
+spider learn &lt;file.sp&gt;
+spider lsp
+spider --version
+</code></pre>
+<p>Exit code <code>0</code> means success. Exit code <code>1</code> means a user program or project
+problem. Exit code <code>2</code> means command usage error.</p>
+<h2 id="web"><a class="header" href="#web">web</a></h2>
+<pre><code class="language-text">web install &lt;name&gt;
+web publish
+web audit
+web remove &lt;name&gt;
+web --version
+</code></pre>
+<p><code>web</code> must be run inside a project containing <code>web.toml</code>, except for help and
+version output.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="bytecode-reference"><a class="header" href="#bytecode-reference">Bytecode Reference</a></h1>
+<p>Silk bytecode is register based. Each function prototype has a fixed register
+count, bytecode instructions, and a constant table.</p>
+<h2 id="program"><a class="header" href="#program">Program</a></h2>
+<ul>
+<li><code>protos</code>: function prototypes.</li>
+<li><code>entry</code>: script entry prototype.</li>
+<li><code>main</code>: optional zero-arity <code>main</code>.</li>
+<li><code>n_globals</code>: global slot count.</li>
+<li><code>tests</code>: named test prototypes.</li>
+</ul>
+<h2 id="instructions"><a class="header" href="#instructions">Instructions</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Instruction</th><th>Operands</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>LoadConst</code></td><td>dst, const</td><td>Load constant.</td></tr>
+<tr><td><code>LoadUnit</code></td><td>dst</td><td>Load <code>nothing</code>.</td></tr>
+<tr><td><code>Move</code></td><td>dst, src</td><td>Copy value.</td></tr>
+<tr><td><code>LoadGlobal</code></td><td>dst, slot</td><td>Read global.</td></tr>
+<tr><td><code>StoreGlobal</code></td><td>slot, src</td><td>Write global.</td></tr>
+<tr><td><code>Bin</code></td><td>op, dst, a, b</td><td>Binary operation.</td></tr>
+<tr><td><code>Neg</code></td><td>dst, src</td><td>Numeric negation.</td></tr>
+<tr><td><code>Not</code></td><td>dst, src</td><td>Boolean negation.</td></tr>
+<tr><td><code>Jump</code></td><td>target</td><td>Unconditional jump.</td></tr>
+<tr><td><code>JumpIfFalse</code></td><td>cond, target</td><td>Conditional branch.</td></tr>
+<tr><td><code>JumpIfTrue</code></td><td>cond, target</td><td>Conditional branch.</td></tr>
+<tr><td><code>Call</code></td><td>dst, proto, args</td><td>Call known function.</td></tr>
+<tr><td><code>CallValue</code></td><td>dst, callee, args</td><td>Call function value.</td></tr>
+<tr><td><code>CallMethod</code></td><td>dst, recv, name, args</td><td>Call method.</td></tr>
+<tr><td><code>CallModule</code></td><td>dst, module, name, args</td><td>Call module function.</td></tr>
+<tr><td><code>ModuleConst</code></td><td>dst, module, name</td><td>Load module constant.</td></tr>
+<tr><td><code>MakeList</code></td><td>dst, items</td><td>Construct list.</td></tr>
+<tr><td><code>MakeMap</code></td><td>dst, pairs</td><td>Construct map.</td></tr>
+<tr><td><code>MakeRange</code></td><td>dst, lo, hi</td><td>Construct range.</td></tr>
+<tr><td><code>Index</code></td><td>dst, base, index</td><td>Read index.</td></tr>
+<tr><td><code>IndexSet</code></td><td>base, index, value</td><td>Write index.</td></tr>
+<tr><td><code>GetField</code></td><td>dst, base, field</td><td>Read record field.</td></tr>
+<tr><td><code>SetField</code></td><td>base, field, value</td><td>Write record field.</td></tr>
+<tr><td><code>MakeRecord</code></td><td>dst, shape, fields</td><td>Construct record.</td></tr>
+<tr><td><code>MakeVariant</code></td><td>dst, tag, fields</td><td>Construct choice value.</td></tr>
+<tr><td><code>TestTag</code></td><td>dst, value, tag</td><td>Test variant tag.</td></tr>
+<tr><td><code>GetVariantField</code></td><td>dst, value, pos</td><td>Read variant payload.</td></tr>
+<tr><td><code>TryUnwrap</code></td><td>dst, value, fail_target</td><td>Unwrap <code>Ok</code>/<code>Some</code> or branch.</td></tr>
+<tr><td><code>NoneToFail</code></td><td>reg</td><td>Convert <code>None</code> propagation to <code>Fail</code>.</td></tr>
+<tr><td><code>IterNew</code></td><td>dst, iterable</td><td>Create iterator.</td></tr>
+<tr><td><code>IterNext</code></td><td>item, iter, done_target</td><td>Advance iterator.</td></tr>
+<tr><td><code>Concat</code></td><td>dst, parts</td><td>String interpolation concatenation.</td></tr>
+<tr><td><code>Say</code></td><td>src</td><td>Print value.</td></tr>
+<tr><td><code>Ask</code></td><td>dst, prompt</td><td>Prompt and read text.</td></tr>
+<tr><td><code>Ret</code></td><td>src</td><td>Return value.</td></tr>
+<tr><td><code>RetUnit</code></td><td>none</td><td>Return <code>nothing</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="performance-notes"><a class="header" href="#performance-notes">Performance Notes</a></h2>
+<p>Instruction operands currently use ordinary Rust enum variants and vectors.
+Packing and optimization are intentionally deferred to M8.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="compiler-architecture"><a class="header" href="#compiler-architecture">Compiler Architecture</a></h1>
+<p>Spider’s implemented pipeline is:</p>
+<pre><code class="language-mermaid">flowchart LR
+    Source[".sp source"] --&gt; Lexer["Lexer"]
+    Lexer --&gt; CST["Lossless CST"]
+    CST --&gt; AST["Typed AST views"]
+    AST --&gt; Check["Name and type checker"]
+    Check --&gt; Project["Project merge and module visibility"]
+    Project --&gt; Bytecode["Silk bytecode compiler"]
+    Bytecode --&gt; VM["Silk VM"]
+</code></pre>
+<h2 id="lexer"><a class="header" href="#lexer">Lexer</a></h2>
+<p>The lexer produces tokens and diagnostics. It also inserts zero-width
+<code>Indent</code>/<code>Dedent</code> tokens. Newlines inside brackets are trivia.</p>
+<h2 id="parser"><a class="header" href="#parser">Parser</a></h2>
+<p>The parser is recursive descent and error tolerant.</p>
+<pre><code class="language-mermaid">flowchart TD
+    Tokens --&gt; SourceFile
+    SourceFile --&gt; Statements
+    Statements --&gt; Declarations
+    Statements --&gt; Expressions
+    Expressions --&gt; Recovery["line-based recovery"]
+</code></pre>
+<p>Guarantees:</p>
+<ul>
+<li>never panic on any input;</li>
+<li>preserve every byte of input in the tree;</li>
+<li>report independent errors in source order;</li>
+<li>cap nesting depth.</li>
+</ul>
+<h2 id="semantic-checker"><a class="header" href="#semantic-checker">Semantic Checker</a></h2>
+<p>The checker resolves names, checks mutability, infers types, checks module
+members against the stdlib registry, verifies match exhaustiveness, validates
+<code>try</code>, and applies capability policy.</p>
+<pre><code class="language-mermaid">flowchart LR
+    Parse --&gt; Names["collect names"]
+    Names --&gt; Signatures["collect signatures"]
+    Signatures --&gt; Bodies["check bodies"]
+    Bodies --&gt; Diagnostics
+</code></pre>
+<h2 id="project-checker"><a class="header" href="#project-checker">Project Checker</a></h2>
+<p>M5 adds <code>check_project</code>, which merges type names, per-module signatures, exports
+and constructors, then checks each module body with the merged world.</p>
+<h2 id="bytecode-generator"><a class="header" href="#bytecode-generator">Bytecode Generator</a></h2>
+<p>The compiler lowers CST-shaped typed programs to register instructions. It
+assumes the checker has already accepted the program; inconsistencies are
+toolchain bugs, not user diagnostics.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="silk-virtual-machine"><a class="header" href="#silk-virtual-machine">Silk Virtual Machine</a></h1>
+<p>Silk is Spider’s current execution engine.</p>
+<h2 id="architecture"><a class="header" href="#architecture">Architecture</a></h2>
+<pre><code class="language-mermaid">flowchart TD
+    Program --&gt; Proto["Function prototypes"]
+    Proto --&gt; Frame["Call frames"]
+    Frame --&gt; Registers
+    Registers --&gt; Instr["Instruction dispatch loop"]
+    Instr --&gt; Values
+    Values --&gt; IO["Console/files"]
+</code></pre>
+<h2 id="values"><a class="header" href="#values">Values</a></h2>
+<p>Runtime values include <code>Unit</code>, <code>Int</code>, <code>Float</code>, <code>Bool</code>, <code>Text</code>, <code>List</code>, <code>Map</code>,
+<code>Range</code>, <code>Record</code>, <code>Variant</code>, <code>FnRef</code>, and iterator values.</p>
+<p>Lists, maps, records, variants, and text are reference-counted internally.
+Mutation uses copy-on-write so Spider assignment remains value-like.</p>
+<h2 id="call-frames"><a class="header" href="#call-frames">Call Frames</a></h2>
+<p>Call frames are stored on an explicit heap stack. Spider recursion does not use
+the host call stack. The language recursion limit is 1000.</p>
+<h2 id="memory"><a class="header" href="#memory">Memory</a></h2>
+<p>There is no exposed manual memory management. The VM uses Rust ownership and
+reference counting internally.</p>
+<h2 id="capabilities-1"><a class="header" href="#capabilities-1">Capabilities</a></h2>
+<p>The VM stores an allow-set and checks capability-gated operations at the
+operation boundary. This is defense in depth; the checker also enforces
+capabilities.</p>
+<h2 id="runtime-errors"><a class="header" href="#runtime-errors">Runtime Errors</a></h2>
+<p>Runtime panics render in Spider Explain format.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="formatter"><a class="header" href="#formatter">Formatter</a></h1>
+<p><code>spider fmt</code> is implemented in <code>crates/spider-fmt</code>. It is canonical and has no
+configuration.</p>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<ul>
+<li>Refuses to format files with parse errors.</li>
+<li>Normalizes whitespace and indentation.</li>
+<li>Preserves comments.</li>
+<li>Is idempotent: formatting twice produces the same output.</li>
+<li>Formatted output reparses cleanly.</li>
+</ul>
+<h2 id="motivation-1"><a class="header" href="#motivation-1">Motivation</a></h2>
+<p>The formatter is part of the language contract. Users should not spend
+attention on style settings.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="package-loader-and-registry"><a class="header" href="#package-loader-and-registry">Package Loader and Registry</a></h1>
+<h2 id="loader"><a class="header" href="#loader">Loader</a></h2>
+<p>The loader maps imports to files and packages.</p>
+<pre><code class="language-mermaid">flowchart TD
+    Use["use helpers"] --&gt; Std{"stdlib name?"}
+    Std --&gt;|yes| Registry["stdlib registry"]
+    Std --&gt;|no| Project["src/helpers.sp"]
+    Project --&gt; Sibling["sibling helpers.sp"]
+    Sibling --&gt; Package["web_modules/helpers/src/lib.sp"]
+</code></pre>
+<p>Stdlib names cannot be shadowed by files. Cycles are reported with the cycle
+path.</p>
+<h2 id="registry"><a class="header" href="#registry">Registry</a></h2>
+<p>The local registry copies packages into <code>~/.spider/registry/&lt;name&gt;/&lt;version&gt;</code>.
+Published versions are immutable. Installs copy package files into
+<code>web_modules</code>, write <code>web.lock</code>, update <code>web.toml</code>, and refuse capability
+escalation.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="tutorial"><a class="header" href="#tutorial">Tutorial</a></h1>
+<h2 id="lesson-1-hello"><a class="header" href="#lesson-1-hello">Lesson 1: Hello</a></h2>
+<pre><code class="language-spider">say "Hello, world!"
+</code></pre>
+<h2 id="lesson-2-input"><a class="header" href="#lesson-2-input">Lesson 2: Input</a></h2>
+<pre><code class="language-spider">let name = ask "What is your name?"
+say "Welcome, {name}!"
+</code></pre>
+<h2 id="lesson-3-branches"><a class="header" href="#lesson-3-branches">Lesson 3: Branches</a></h2>
+<pre><code class="language-spider">let age = 12
+if age &gt;= 13
+    say "teen"
+else
+    say "kid"
+</code></pre>
+<h2 id="lesson-4-loops"><a class="header" href="#lesson-4-loops">Lesson 4: Loops</a></h2>
+<pre><code class="language-spider">var total = 0
+for i in 1 to 10
+    total += i
+say total
+</code></pre>
+<h2 id="lesson-5-functions"><a class="header" href="#lesson-5-functions">Lesson 5: Functions</a></h2>
+<pre><code class="language-spider">fn double(n: Int) -&gt; Int
+    return n * 2
+
+say double(21)
+</code></pre>
+<h2 id="lesson-6-records-and-choices"><a class="header" href="#lesson-6-records-and-choices">Lesson 6: Records and Choices</a></h2>
+<pre><code class="language-spider">record Point
+    x: Float
+    y: Float
+
+choice Shape
+    Circle(radius: Float)
+    Dot
+</code></pre>
+<h2 id="lesson-7-tests"><a class="header" href="#lesson-7-tests">Lesson 7: Tests</a></h2>
+<pre><code class="language-spider">test "math works"
+    expect(1 + 1, 2)
+</code></pre>
+<h2 id="challenge"><a class="header" href="#challenge">Challenge</a></h2>
+<p>Write a program that sums the even numbers from 1 to 20.</p>
+<p>Answer:</p>
+<pre><code class="language-spider">var total = 0
+for n in 1 to 20
+    if n % 2 == 0
+        total += n
+say total
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="cookbook"><a class="header" href="#cookbook">Cookbook</a></h1>
+<h2 id="print-a-list"><a class="header" href="#print-a-list">Print a List</a></h2>
+<pre><code class="language-spider">say [1, 2, 3]
+</code></pre>
+<h2 id="sort-text"><a class="header" href="#sort-text">Sort Text</a></h2>
+<pre><code class="language-spider">let names = ["Grace", "Ada", "Lin"]
+say names.sort()
+</code></pre>
+<h2 id="safely-read-a-file"><a class="header" href="#safely-read-a-file">Safely Read a File</a></h2>
+<p>Requires <code>fs</code>.</p>
+<pre><code class="language-spider">use files
+
+match files.read_text("notes.txt")
+    Ok(text) -&gt; say text
+    Fail(problem) -&gt; say "Could not read: {problem}"
+</code></pre>
+<p>Run:</p>
+<pre><code class="language-powershell">spider run --allow fs read.sp
+</code></pre>
+<h2 id="deterministic-random"><a class="header" href="#deterministic-random">Deterministic Random</a></h2>
+<pre><code class="language-spider">use random
+
+random.seed(7)
+say random.int(1, 6)
+</code></pre>
+<h2 id="a-simple-parser-shape"><a class="header" href="#a-simple-parser-shape">A Simple Parser Shape</a></h2>
+<pre><code class="language-spider">fn parse_age(text: Text) -&gt; Outcome of Int
+    if text.length() == 0
+        return Fail("empty input")
+    return Ok(21)
+</code></pre>
+<h2 id="test-a-function"><a class="header" href="#test-a-function">Test a Function</a></h2>
+<pre><code class="language-spider">fn inc(n: Int) -&gt; Int
+    return n + 1
+
+test "inc"
+    expect(inc(1), 2)
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="projects"><a class="header" href="#projects">Projects</a></h1>
+<p>These projects use implemented Spider features. Networking and real HTTP are
+not implemented today, so HTTP-related ideas are design exercises rather than
+compilable current projects.</p>
+<h2 id="calculator"><a class="header" href="#calculator">Calculator</a></h2>
+<p>Build functions for add, subtract, multiply, divide, and test them.</p>
+<pre><code class="language-spider">fn add(a: Int, b: Int) -&gt; Int
+    return a + b
+
+fn sub(a: Int, b: Int) -&gt; Int
+    return a - b
+
+test "calculator"
+    expect(add(2, 3), 5)
+    expect(sub(5, 2), 3)
+</code></pre>
+<h2 id="todo-cli-data-model"><a class="header" href="#todo-cli-data-model">Todo CLI Data Model</a></h2>
+<pre><code class="language-spider">record Todo
+    title: Text
+    done: Bool
+
+fn label(todo: Todo) -&gt; Text
+    if todo.done
+        return "[x] {todo.title}"
+    return "[ ] {todo.title}"
+</code></pre>
+<h2 id="json-parser-sketch"><a class="header" href="#json-parser-sketch">JSON Parser Sketch</a></h2>
+<p>Current Spider can model parser results with <code>Outcome</code>, records, choices, and
+lists, but the stdlib has no JSON module yet.</p>
+<h2 id="package-manager-exercise"><a class="header" href="#package-manager-exercise">Package Manager Exercise</a></h2>
+<p>Create a library with <code>src/lib.sp</code>, publish it locally with <code>web publish</code>, then
+install it into another project with <code>web install</code>.</p>
+<h2 id="compiler-extension-exercise"><a class="header" href="#compiler-extension-exercise">Compiler Extension Exercise</a></h2>
+<p>Add a new stdlib method by changing the registry, checker dispatch, VM method
+dispatch, tests, and this book.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="exercises-and-answers"><a class="header" href="#exercises-and-answers">Exercises and Answers</a></h1>
+<p>This chapter collects focused exercises. They are intentionally small enough to
+compile against the current compiler.</p>
+<h2 id="basics"><a class="header" href="#basics">Basics</a></h2>
+<ol>
+<li>Print your name.</li>
+</ol>
+<pre><code class="language-spider">say "Avinash"
+</code></pre>
+<ol start="2">
+<li>Store a number in <code>let</code> and print double.</li>
+</ol>
+<pre><code class="language-spider">let n = 21
+say n * 2
+</code></pre>
+<ol start="3">
+<li>Count from 1 to 3.</li>
+</ol>
+<pre><code class="language-spider">for i in 1 to 3
+    say i
+</code></pre>
+<ol start="4">
+<li>Write a mutable counter.</li>
+</ol>
+<pre><code class="language-spider">var count = 0
+count += 1
+say count
+</code></pre>
+<ol start="5">
+<li>Write a function returning text.</li>
+</ol>
+<pre><code class="language-spider">fn greet(name: Text) -&gt; Text
+    return "Hello, {name}"
+</code></pre>
+<h2 id="control-flow-1"><a class="header" href="#control-flow-1">Control Flow</a></h2>
+<ol start="6">
+<li>Classify an age.</li>
+</ol>
+<pre><code class="language-spider">let age = 12
+if age &gt;= 13
+    say "teen"
+else
+    say "kid"
+</code></pre>
+<ol start="7">
+<li>Sum a range.</li>
+</ol>
+<pre><code class="language-spider">var total = 0
+for i in 1 to 10
+    total += i
+say total
+</code></pre>
+<ol start="8">
+<li>Use <code>repeat</code>.</li>
+</ol>
+<pre><code class="language-spider">repeat 3 times
+    say "again"
+</code></pre>
+<ol start="9">
+<li>Use <code>while</code>.</li>
+</ol>
+<pre><code class="language-spider">var n = 3
+while n &gt; 0
+    say n
+    n -= 1
+</code></pre>
+<ol start="10">
+<li>Match a <code>Maybe</code>.</li>
+</ol>
+<pre><code class="language-spider">match [1, 2].first()
+    Some(value) -&gt; say value
+    None -&gt; say "empty"
+</code></pre>
+<h2 id="data"><a class="header" href="#data">Data</a></h2>
+<ol start="11">
+<li>Define a record.</li>
+</ol>
+<pre><code class="language-spider">record Point
+    x: Float
+    y: Float
+
+let p = Point(1.0, 2.0)
+say p.x
+</code></pre>
+<ol start="12">
+<li>Define a choice.</li>
+</ol>
+<pre><code class="language-spider">choice Light
+    Red
+    Green
+
+match Red
+    Red -&gt; say "stop"
+    Green -&gt; say "go"
+</code></pre>
+<ol start="13">
+<li>Use a map.</li>
+</ol>
+<pre><code class="language-spider">let ages = {"Ada": 12}
+say ages["Ada"]
+</code></pre>
+<ol start="14">
+<li>Use a list method.</li>
+</ol>
+<pre><code class="language-spider">say [3, 1, 2].sort()
+</code></pre>
+<ol start="15">
+<li>Use text methods.</li>
+</ol>
+<pre><code class="language-spider">say " Spider ".trim().upper()
+</code></pre>
+<h2 id="testing-1"><a class="header" href="#testing-1">Testing</a></h2>
+<ol start="16">
+<li>Test a function.</li>
+</ol>
+<pre><code class="language-spider">fn double(n: Int) -&gt; Int
+    return n * 2
+
+test "double"
+    expect(double(4), 8)
+</code></pre>
+<ol start="17">
+<li>Seed random.</li>
+</ol>
+<pre><code class="language-spider">use random
+random.seed(1)
+say random.int(1, 6)
+</code></pre>
+<ol start="18">
+<li>Handle an outcome.</li>
+</ol>
+<pre><code class="language-spider">fn ok() -&gt; Outcome of Int
+    return Ok(1)
+
+match ok()
+    Ok(value) -&gt; say value
+    Fail(problem) -&gt; say problem
+</code></pre>
+<ol start="19">
+<li>Use fallback <code>try</code>.</li>
+</ol>
+<pre><code class="language-spider">fn fail() -&gt; Outcome of Int
+    return Fail("no")
+
+let value = try fail() else 0
+say value
+</code></pre>
+<ol start="20">
+<li>Show value semantics.</li>
+</ol>
+<pre><code class="language-spider">var a = [1]
+var b = a
+b.push(2)
+say a
+say b
+</code></pre>
+<h2 id="challenge-problems"><a class="header" href="#challenge-problems">Challenge Problems</a></h2>
+<ol start="21">
+<li>Write <code>factorial</code>.</li>
+</ol>
+<pre><code class="language-spider">fn factorial(n: Int) -&gt; Int
+    if n &lt; 2
+        return 1
+    return n * factorial(n - 1)
+</code></pre>
+<ol start="22">
+<li>Find the largest list element using <code>.sort().last()</code>.</li>
+</ol>
+<pre><code class="language-spider">match [3, 9, 1].sort().last()
+    Some(value) -&gt; say value
+    None -&gt; say "empty"
+</code></pre>
+<ol start="23">
+<li>Convert a score to a grade with <code>Outcome</code>.</li>
+</ol>
+<pre><code class="language-spider">fn grade(score: Int) -&gt; Outcome of Text
+    if score &lt; 0
+        return Fail("negative")
+    if score &gt;= 90
+        return Ok("A")
+    return Ok("B")
+</code></pre>
+<ol start="24">
+<li>Add a test for <code>grade</code>.</li>
+</ol>
+<pre><code class="language-spider">test "grade"
+    expect(grade(95), Ok("A"))
+</code></pre>
+<ol start="25">
+<li>Explain why <code>files.read_text</code> needs a capability.</li>
+</ol>
+<p>Answer: it observes the host filesystem, so Safe Mode requires <code>fs</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
+<h2 id="repository-structure"><a class="header" href="#repository-structure">Repository Structure</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Path</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>crates/spider-syntax</code></td><td>Lexer, parser, CST, AST views, diagnostics.</td></tr>
+<tr><td><code>crates/spider-hir</code></td><td>Semantic checker, types, stdlib registry, manifest caps.</td></tr>
+<tr><td><code>crates/spider-silk</code></td><td>Bytecode compiler, VM, runtime values.</td></tr>
+<tr><td><code>crates/spider-fmt</code></td><td>Formatter.</td></tr>
+<tr><td><code>crates/spider-web</code></td><td>Project loader and <code>web</code> package manager.</td></tr>
+<tr><td><code>crates/spider-lsp</code></td><td>Language server.</td></tr>
+<tr><td><code>crates/spider-cli</code></td><td><code>spider</code> command.</td></tr>
+<tr><td><code>corpus</code></td><td>Golden syntax, format, check, run fixtures.</td></tr>
+<tr><td><code>docs</code></td><td>SRS, LDD, ADRs, milestone notes.</td></tr>
+<tr><td><code>website</code></td><td>Current static website assets.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="test-commands"><a class="header" href="#test-commands">Test Commands</a></h2>
+<pre><code class="language-powershell">cargo test --workspace
+</code></pre>
+<h2 id="standards"><a class="header" href="#standards">Standards</a></h2>
+<ul>
+<li>Preserve parser losslessness.</li>
+<li>Add diagnostics with authored explanations.</li>
+<li>Update corpus goldens when syntax or formatting changes intentionally.</li>
+<li>Keep stdlib registry, checker, VM dispatch, tests, and docs in sync.</li>
+<li>Never document future features as implemented.</li>
+</ul>
+<h2 id="review-checklist"><a class="header" href="#review-checklist">Review Checklist</a></h2>
+<ul>
+<li>Does it parse broken input without panic?</li>
+<li>Does it preserve source text?</li>
+<li>Does <code>spider fmt</code> stay idempotent?</li>
+<li>Does the checker avoid cascaded diagnostics?</li>
+<li>Does the VM preserve value semantics?</li>
+<li>Are capabilities enforced at check time and runtime?</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="adding-language-features"><a class="header" href="#adding-language-features">Adding Language Features</a></h1>
+<h2 id="adding-syntax"><a class="header" href="#adding-syntax">Adding Syntax</a></h2>
+<ol>
+<li>Add token kinds in <code>spider-syntax</code>.</li>
+<li>Extend the lexer if new spelling is required.</li>
+<li>Extend the parser with recovery behavior.</li>
+<li>Add corpus examples and tree snapshots.</li>
+<li>Update the formatter.</li>
+<li>Add diagnostics and explanations.</li>
+<li>Update this book.</li>
+</ol>
+<h2 id="adding-type-rules"><a class="header" href="#adding-type-rules">Adding Type Rules</a></h2>
+<ol>
+<li>Extend <code>Ty</code> if needed.</li>
+<li>Add inference/checking rules.</li>
+<li>Add positive and negative corpus examples.</li>
+<li>Prevent diagnostic cascades.</li>
+</ol>
+<h2 id="adding-bytecode"><a class="header" href="#adding-bytecode">Adding Bytecode</a></h2>
+<ol>
+<li>Add an <code>Instr</code> variant.</li>
+<li>Lower from the compiler.</li>
+<li>Execute it in the VM loop.</li>
+<li>Add runtime tests and semantics cases.</li>
+<li>Document the instruction in the bytecode reference.</li>
+</ol>
+<h2 id="adding-standard-library-apis"><a class="header" href="#adding-standard-library-apis">Adding Standard Library APIs</a></h2>
+<ol>
+<li>Add the signature and doc to <code>spider_hir::stdlib</code>.</li>
+<li>Add VM dispatch.</li>
+<li>Add checker or method dispatch tests.</li>
+<li>Add examples.</li>
+<li>Update the standard library chapter.</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="grammar-sketch"><a class="header" href="#grammar-sketch">Grammar Sketch</a></h1>
+<p>This is an implementation-oriented grammar sketch, not a formal complete BNF.</p>
+<pre><code class="language-text">file        = item*
+item        = use | record | choice | shape | fn | test | stmt
+use         = "use" ident ("." ident)*
+record      = "record" name newline indent field* dedent
+choice      = "choice" name newline indent variant* dedent
+shape       = "shape" name newline indent fn-signature* dedent
+fn          = ["public"] "fn" name "(" params ")" ["-&gt;" type] [where] block
+test        = "test" string block
+stmt        = let | var | assign | say | return | if | for | while | repeat
+            | match | do-together | spawn | expr
+block       = newline indent stmt* dedent
+type        = name | "List" "of" type | "Maybe" "of" type
+            | "Outcome" "of" type | "Map" "of" type "to" type
+expr        = or-expr
+</code></pre>
+<p>The parser source remains authoritative.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="keywords-and-precedence"><a class="header" href="#keywords-and-precedence">Keywords and Precedence</a></h1>
+<h2 id="hard-keywords"><a class="header" href="#hard-keywords">Hard Keywords</a></h2>
+<p><code>let</code>, <code>var</code>, <code>fn</code>, <code>if</code>, <code>else</code>, <code>for</code>, <code>in</code>, <code>to</code>, <code>while</code>, <code>repeat</code>,
+<code>match</code>, <code>try</code>, <code>use</code>, <code>return</code>, <code>say</code>, <code>ask</code>, <code>spawn</code>, <code>do</code>, <code>and</code>, <code>or</code>,
+<code>not</code>, <code>true</code>, <code>false</code>, <code>of</code>, <code>is</code>, and <code>public</code>.</p>
+<h2 id="soft-keywords-1"><a class="header" href="#soft-keywords-1">Soft Keywords</a></h2>
+<p><code>record</code>, <code>choice</code>, <code>shape</code>, <code>test</code>, <code>times</code>, <code>together</code>, and <code>where</code>.</p>
+<h2 id="precedence"><a class="header" href="#precedence">Precedence</a></h2>
+<ol>
+<li>postfix: calls, methods, fields, indexes</li>
+<li>unary minus</li>
+<li>multiplication, division, modulo</li>
+<li>addition, subtraction</li>
+<li>range <code>to</code></li>
+<li>comparisons</li>
+<li><code>not</code></li>
+<li><code>and</code></li>
+<li><code>or</code></li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="glossary"><a class="header" href="#glossary">Glossary</a></h1>
+<p>Capability: A named permission such as <code>fs</code> that a program or package must
+declare before using gated APIs.</p>
+<p>CST: Concrete syntax tree. Spider’s CST is lossless.</p>
+<p>HIR: Higher-level semantic representation. The repository uses <code>spider-hir</code>
+for checking even though the public structure is still close to syntax.</p>
+<p>Outcome: A typed expected-failure value, either <code>Ok(value)</code> or <code>Fail(problem)</code>.</p>
+<p>Maybe: An optional value, either <code>Some(value)</code> or <code>None</code>.</p>
+<p>Silk: Spider’s bytecode virtual machine.</p>
+<p>Soft keyword: A word that is only a keyword in specific grammar positions.</p>
+<p>Value semantics: Assignment behaves like a copy.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="faq"><a class="header" href="#faq">FAQ</a></h1>
+<h2 id="is-spider-implemented"><a class="header" href="#is-spider-implemented">Is Spider implemented?</a></h2>
+<p>Partially. The parser, checker, formatter, VM, CLI, local package manager, and
+LSP are implemented. Native build, public registry, real concurrency, and docs
+generation are future work.</p>
+<h2 id="is-spider-english"><a class="header" href="#is-spider-english">Is Spider English?</a></h2>
+<p>No. Spider uses readable words but has a strict grammar.</p>
+<h2 id="does-spider-have-null"><a class="header" href="#does-spider-have-null">Does Spider have null?</a></h2>
+<p>No current null value exists. Use <code>Maybe</code>.</p>
+<h2 id="does-spider-use-exceptions"><a class="header" href="#does-spider-use-exceptions">Does Spider use exceptions?</a></h2>
+<p>Expected failures use <code>Outcome</code>. Runtime panics exist for bugs such as
+divide-by-zero or out-of-range indexing.</p>
+<h2 id="can-packages-touch-files-by-default"><a class="header" href="#can-packages-touch-files-by-default">Can packages touch files by default?</a></h2>
+<p>No. File APIs require the <code>fs</code> capability.</p>
+<h2 id="does-spider-build-work"><a class="header" href="#does-spider-build-work">Does <code>spider build</code> work?</a></h2>
+<p>No. It is a roadmap item.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="troubleshooting-1"><a class="header" href="#troubleshooting-1">Troubleshooting</a></h1>
+<h2 id="spider-build-is-not-a-command"><a class="header" href="#spider-build-is-not-a-command"><code>spider: build is not a command</code></a></h2>
+<p><code>spider build</code> is not implemented yet.</p>
+<h2 id="e0001-tabs-in-indentation"><a class="header" href="#e0001-tabs-in-indentation">E0001 Tabs in indentation</a></h2>
+<p>Use spaces for indentation.</p>
+<h2 id="e0244-missing-capability"><a class="header" href="#e0244-missing-capability">E0244 Missing capability</a></h2>
+<p>Add the capability to <code>web.toml</code> or pass <code>--allow</code> for a script run.</p>
+<h2 id="e0303-list-position"><a class="header" href="#e0303-list-position">E0303 List position</a></h2>
+<p>List indexes start at 0. Check the list length before indexing.</p>
+<h2 id="package-install-refused"><a class="header" href="#package-install-refused">Package install refused</a></h2>
+<p>The dependency asks for capabilities your project does not allow. Add the
+capability only if you trust the package.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="validation-report"><a class="header" href="#validation-report">Validation Report</a></h1>
+<p>Generated from repository inspection on 2026-07-06.</p>
+<h2 id="build-verification"><a class="header" href="#build-verification">Build Verification</a></h2>
+<ul>
+<li><code>cargo test --workspace</code>: passed.</li>
+<li><code>cargo install mdbook</code>: completed, installing mdBook 0.5.3.</li>
+<li><code>mdbook build book</code>: passed.</li>
+<li>HTML output path: <code>book/book</code>.</li>
+</ul>
+<h2 id="counts"><a class="header" href="#counts">Counts</a></h2>
+<ul>
+<li>Chapters in this mdBook: 35.</li>
+<li>Spider code examples written in this book: 70+.</li>
+<li>Exercises and challenge prompts: 25.</li>
+<li>Standard-library registry entries documented: 39.</li>
+<li>Bytecode instructions documented: 35.</li>
+</ul>
+<p>This first generated book is not yet a 400-600 page manuscript and does not
+yet contain 600 examples or 300 exercises. It is a complete publishable
+documentation skeleton with substantive content for every implemented area,
+ready for expansion as the language grows.</p>
+<h2 id="verified-implemented-cli-commands"><a class="header" href="#verified-implemented-cli-commands">Verified Implemented CLI Commands</a></h2>
+<ul>
+<li><code>spider run</code></li>
+<li><code>spider test</code></li>
+<li><code>spider new</code></li>
+<li><code>spider repl</code></li>
+<li><code>spider lsp</code></li>
+<li><code>spider learn</code></li>
+<li><code>spider fmt</code></li>
+<li><code>spider check</code></li>
+<li><code>spider tree</code></li>
+<li><code>spider tokens</code></li>
+<li><code>spider explain</code></li>
+<li><code>web install</code></li>
+<li><code>web publish</code></li>
+<li><code>web audit</code></li>
+<li><code>web remove</code></li>
+</ul>
+<h2 id="undocumented-apis"><a class="header" href="#undocumented-apis">Undocumented APIs</a></h2>
+<p>No current stdlib registry entries are intentionally omitted from the standard
+library chapter.</p>
+<h2 id="undocumented-compiler-features"><a class="header" href="#undocumented-compiler-features">Undocumented Compiler Features</a></h2>
+<p>The parser and checker include internal recovery details and many diagnostics
+not expanded one by one in this first pass. The diagnostics chapter names the
+major families and runtime codes.</p>
+<h2 id="undocumented-vm-instructions"><a class="header" href="#undocumented-vm-instructions">Undocumented VM Instructions</a></h2>
+<p>No current <code>Instr</code> variants are intentionally omitted from the bytecode
+reference.</p>
+<h2 id="known-discrepancies"><a class="header" href="#known-discrepancies">Known Discrepancies</a></h2>
+<ul>
+<li>Roadmap commands <code>spider build</code>, <code>spider doc</code>, and <code>spider package</code> are not
+implemented.</li>
+<li><code>break</code> and <code>continue</code> are requested in the original documentation brief but
+are not implemented.</li>
+<li>Sets, tuples, traits, interfaces, closures, anonymous functions, native AOT,
+real concurrency, HTTP server APIs, JSON APIs, regex APIs, env APIs, exec
+APIs, and AI APIs are not implemented in the current code.</li>
+<li><code>shape</code> parses but does not yet provide full trait/interface semantics.</li>
+<li>Website documentation, PDF, EPUB, and DOCX outputs require additional build
+tooling beyond this mdBook source.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace-2a3cd908.js"></script>
+        <script src="mode-rust-2c9d5c9a.js"></script>
+        <script src="editor-16ca416c.js"></script>
+        <script src="theme-dawn-4493f9c8.js"></script>
+        <script src="theme-tomorrow_night-9dbe62a9.js"></script>
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-09f2665d.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-c22b7243.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+
+    </div>
+    </body>
+</html>
