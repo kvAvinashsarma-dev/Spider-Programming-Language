@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spider Playground — code in your browser</title>
 <meta name="description" content="Write and run real Spider code in your browser. The actual compiler and Silk VM, compiled to WebAssembly.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕷️</text></svg>">
+<link rel="icon" type="image/svg+xml" href="spider-logo.svg">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <nav>
   <div class="wrap">
-    <a class="logo" href="index.html"><span class="mark">🕷️</span> SPIDER</a>
+    <a class="logo" href="index.html"><img src="spider-logo.svg" alt=""> SPIDER</a>
     <div class="links">
       <a href="index.html">Home</a>
       <a href="playground.html" class="active">Playground</a>
@@ -43,7 +43,7 @@
     </div>
 
     <div class="pg">
-      <textarea id="pg-src" class="editor" spellcheck="false">say "Hello, world! 🕷️"
+      <textarea id="pg-src" class="editor" spellcheck="false">say "Hello, world!"
 
 let name = ask "What is your name?"
 say "Welcome to Spider, {name}!"
@@ -65,7 +65,7 @@ say "Welcome to Spider, {name}!"
 
 <footer>
   <div class="wrap">
-    <div>🕷️ <strong>Spider</strong> — spin something. · <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">Source on GitHub</a></div>
+    <div><img class="inline-mark" src="spider-logo.svg" alt=""> <strong>Spider</strong> — spin something. · <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">Source on GitHub</a></div>
     <div>Founded by <a href="https://linkedin.com/in/avinashsarma" target="_blank">Kv Avinash Sarma</a> · co-authored with Claude</div>
   </div>
 </footer>

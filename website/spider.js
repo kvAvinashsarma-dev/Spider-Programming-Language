@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const PG_EXAMPLES = {
   hello: {
-    code: 'say "Hello, world! 🕷️"\n\nlet name = ask "What is your name?"\nsay "Welcome to Spider, {name}!"\n',
+    code: 'say "Hello, world!"\n\nlet name = ask "What is your name?"\nsay "Welcome to Spider, {name}!"\n',
     input: "Ada",
   },
   shapes: {
