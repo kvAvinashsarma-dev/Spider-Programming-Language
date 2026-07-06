@@ -67,7 +67,8 @@ impl Lexer {
     }
 
     fn diag(&mut self, code: &'static str, message: impl Into<String>, offset: usize, len: usize) {
-        self.diags.push(Diagnostic::error(code, message, offset, len));
+        self.diags
+            .push(Diagnostic::error(code, message, offset, len));
     }
 
     fn run(mut self) -> (Vec<Token>, Vec<Diagnostic>) {
@@ -391,7 +392,14 @@ mod tests {
         let ks = kinds("f(\n1\n)\n");
         assert_eq!(
             ks,
-            vec![K::Ident, K::LParen, K::IntLit, K::RParen, K::Newline, K::Eof]
+            vec![
+                K::Ident,
+                K::LParen,
+                K::IntLit,
+                K::RParen,
+                K::Newline,
+                K::Eof
+            ]
         );
     }
 

@@ -247,7 +247,10 @@ mod tests {
 
     #[test]
     fn hello_runs() {
-        assert_eq!(run_capture("say \"Hello, world!\"\n", &[]).unwrap(), "Hello, world!\n");
+        assert_eq!(
+            run_capture("say \"Hello, world!\"\n", &[]).unwrap(),
+            "Hello, world!\n"
+        );
     }
 
     #[test]
@@ -258,11 +261,7 @@ mod tests {
 
     #[test]
     fn value_semantics_copy_on_write() {
-        let out = run_capture(
-            "var a = [1, 2]\nvar b = a\nb.push(3)\nsay a\nsay b\n",
-            &[],
-        )
-        .unwrap();
+        let out = run_capture("var a = [1, 2]\nvar b = a\nb.push(3)\nsay a\nsay b\n", &[]).unwrap();
         assert_eq!(out, "[1, 2]\n[1, 2, 3]\n");
     }
 
@@ -282,11 +281,7 @@ mod tests {
 
     #[test]
     fn ask_reads_input() {
-        let out = run_capture(
-            "let name = ask \"Who?\"\nsay \"Hi, {name}\"\n",
-            &["Grace"],
-        )
-        .unwrap();
+        let out = run_capture("let name = ask \"Who?\"\nsay \"Hi, {name}\"\n", &["Grace"]).unwrap();
         assert_eq!(out, "Hi, Grace\n");
     }
 
@@ -389,11 +384,17 @@ test \"this one fails\"
         let mut io = CaptureIo::default();
         let mut vm = Vm::new(&mut io);
         vm.run_entry(&prepared.program).unwrap();
-        assert!(vm.call_proto(&prepared.program, prepared.program.tests[0].1).is_ok());
+        assert!(vm
+            .call_proto(&prepared.program, prepared.program.tests[0].1)
+            .is_ok());
         let e = vm
             .call_proto(&prepared.program, prepared.program.tests[1].1)
             .unwrap_err();
         assert_eq!(e.code, "E0311");
-        assert!(e.message.contains('5') && e.message.contains('4'), "{}", e.message);
+        assert!(
+            e.message.contains('5') && e.message.contains('4'),
+            "{}",
+            e.message
+        );
     }
 }

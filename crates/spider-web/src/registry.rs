@@ -148,8 +148,9 @@ pub fn publish(project_root: &Path) -> Result<PackageMeta, String> {
 /// Latest published version of a package (highest by dotted-number order).
 fn latest_version(name: &str) -> Result<(String, PathBuf), String> {
     let dir = registry_root().join(name);
-    let entries = fs::read_dir(&dir)
-        .map_err(|_| format!("no package named `{name}` in the registry — `web publish` it first"))?;
+    let entries = fs::read_dir(&dir).map_err(|_| {
+        format!("no package named `{name}` in the registry — `web publish` it first")
+    })?;
     let mut versions: Vec<String> = entries
         .filter_map(|e| e.ok())
         .filter(|e| e.path().is_dir())
@@ -243,10 +244,10 @@ fn update_lock(project_root: &Path, name: &str, version: &str, hash: &str) -> Re
 fn add_dependency_line(project_root: &Path, name: &str, version: &str) -> Result<(), String> {
     let manifest_path = project_root.join("web.toml");
     let text = fs::read_to_string(&manifest_path).map_err(|e| e.to_string())?;
-    if text
-        .lines()
-        .any(|l| l.trim_start().starts_with(&format!("{name} ")) || l.trim_start().starts_with(&format!("{name}=")))
-    {
+    if text.lines().any(|l| {
+        l.trim_start().starts_with(&format!("{name} "))
+            || l.trim_start().starts_with(&format!("{name}="))
+    }) {
         return Ok(());
     }
     let dep_line = format!("{name} = \"{version}\"");
@@ -272,7 +273,10 @@ pub fn audit(project_root: &Path) -> Result<Vec<AuditEntry>, String> {
         return Ok(Vec::new());
     }
     let mut out = Vec::new();
-    for line in fs::read_to_string(&lock_path).map_err(|e| e.to_string())?.lines() {
+    for line in fs::read_to_string(&lock_path)
+        .map_err(|e| e.to_string())?
+        .lines()
+    {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;

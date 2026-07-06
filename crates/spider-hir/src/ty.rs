@@ -112,10 +112,7 @@ impl Unifier {
             (Ty::Rigid(x), Ty::Rigid(y)) => x == y,
             (Ty::Fn(p1, r1), Ty::Fn(p2, r2)) => {
                 p1.len() == p2.len()
-                    && p1
-                        .iter()
-                        .zip(p2.iter())
-                        .all(|(x, y)| self.unify(x, y))
+                    && p1.iter().zip(p2.iter()).all(|(x, y)| self.unify(x, y))
                     && self.unify(r1, r2)
             }
             _ => false,
@@ -153,7 +150,10 @@ pub fn subst_rigids(t: &Ty, map: &HashMap<String, Ty>) -> Ty {
     match t {
         Ty::Rigid(n) => map.get(n).cloned().unwrap_or_else(|| t.clone()),
         Ty::List(t) => Ty::List(Box::new(subst_rigids(t, map))),
-        Ty::Map(k, v) => Ty::Map(Box::new(subst_rigids(k, map)), Box::new(subst_rigids(v, map))),
+        Ty::Map(k, v) => Ty::Map(
+            Box::new(subst_rigids(k, map)),
+            Box::new(subst_rigids(v, map)),
+        ),
         Ty::Maybe(t) => Ty::Maybe(Box::new(subst_rigids(t, map))),
         Ty::Outcome(t) => Ty::Outcome(Box::new(subst_rigids(t, map))),
         Ty::Fn(ps, r) => Ty::Fn(

@@ -431,7 +431,10 @@ impl Parser {
             K::MatchKw => self.match_stmt(),
             K::DoKw => self.do_stmt(),
             K::Indent => {
-                self.error_at_current("E0132", "this line is indented, but nothing above it starts a block");
+                self.error_at_current(
+                    "E0132",
+                    "this line is indented, but nothing above it starts a block",
+                );
                 self.swallow_indented();
             }
             _ => self.expr_or_assign_stmt(),
@@ -553,7 +556,10 @@ impl Parser {
                 }
             }
         } else {
-            self.error_at_current("E0112", "expected a type here (like Int, Text, or List of Int)");
+            self.error_at_current(
+                "E0112",
+                "expected a type here (like Int, Text, or List of Int)",
+            );
             if !is_recovery_boundary(self.current()) {
                 self.bump();
             }
@@ -570,7 +576,11 @@ impl Parser {
         self.decl_block(|p| {
             p.start(K::FieldDecl);
             p.expect_name("E0111", "expected a field name");
-            p.expect(K::Colon, "E0115", "expected `:` between the field's name and its type");
+            p.expect(
+                K::Colon,
+                "E0115",
+                "expected `:` between the field's name and its type",
+            );
             p.type_ref();
             p.end_of_line();
             p.finish();
@@ -611,7 +621,10 @@ impl Parser {
             if p.at(K::FnKw) {
                 p.fn_sig();
             } else {
-                p.error_at_current("E0111", "a shape lists function signatures, starting with `fn`");
+                p.error_at_current(
+                    "E0111",
+                    "a shape lists function signatures, starting with `fn`",
+                );
                 p.recover_to_line_end();
                 p.eat(K::Newline);
             }
@@ -622,7 +635,11 @@ impl Parser {
     fn test_decl(&mut self) {
         self.start(K::TestDecl);
         self.bump(); // test
-        self.expect(K::StrLit, "E0115", "expected the test's name in quotes after `test`");
+        self.expect(
+            K::StrLit,
+            "E0115",
+            "expected the test's name in quotes after `test`",
+        );
         self.block();
         self.finish();
     }
@@ -637,7 +654,11 @@ impl Parser {
         while self.at(K::Newline) {
             self.bump();
         }
-        if !self.expect(K::Indent, "E0131", "expected an indented body — indent with 4 spaces") {
+        if !self.expect(
+            K::Indent,
+            "E0131",
+            "expected an indented body — indent with 4 spaces",
+        ) {
             self.finish();
             return;
         }
@@ -676,7 +697,11 @@ impl Parser {
         while self.at(K::Newline) {
             self.bump();
         }
-        if !self.expect(K::Indent, "E0131", "expected an indented body — indent with 4 spaces") {
+        if !self.expect(
+            K::Indent,
+            "E0131",
+            "expected an indented body — indent with 4 spaces",
+        ) {
             self.finish();
             return;
         }
@@ -794,14 +819,22 @@ impl Parser {
         self.bump(); // match
         self.expr();
         self.start(K::Block);
-        if !self.expect(K::Newline, "E0130", "the match cases start on the next line") {
+        if !self.expect(
+            K::Newline,
+            "E0130",
+            "the match cases start on the next line",
+        ) {
             self.recover_to_line_end();
             self.eat(K::Newline);
         }
         while self.at(K::Newline) {
             self.bump();
         }
-        if self.expect(K::Indent, "E0131", "expected the match cases, indented by 4 spaces") {
+        if self.expect(
+            K::Indent,
+            "E0131",
+            "expected the match cases, indented by 4 spaces",
+        ) {
             loop {
                 while self.at(K::Newline) {
                     self.bump();
@@ -829,7 +862,11 @@ impl Parser {
     fn match_arm(&mut self) {
         self.start(K::MatchArm);
         self.pattern();
-        self.expect(K::Arrow, "E0128", "expected `->` between the pattern and its result");
+        self.expect(
+            K::Arrow,
+            "E0128",
+            "expected `->` between the pattern and its result",
+        );
         // An arm's result is an expression, optionally spoken: `-> say expr`.
         self.eat(K::SayKw);
         self.expr();
@@ -1122,7 +1159,11 @@ impl Parser {
                     let before = self.pos;
                     self.start(K::MapEntry);
                     self.expr();
-                    self.expect(K::Colon, "E0115", "expected `:` between a key and its value");
+                    self.expect(
+                        K::Colon,
+                        "E0115",
+                        "expected `:` between a key and its value",
+                    );
                     self.expr();
                     self.finish();
                     if !self.eat(K::Comma) {

@@ -24,7 +24,10 @@ fn main() {
             println!("  audit            list dependencies: versions, capabilities, integrity");
             println!("  remove <name>    remove a package");
             println!();
-            println!("Registry: {}", spider_web::registry::registry_root().display());
+            println!(
+                "Registry: {}",
+                spider_web::registry::registry_root().display()
+            );
             println!("(local in M5 — the public registry with signing arrives post-1.0)");
             if args.first().is_some() {
                 2
@@ -37,8 +40,9 @@ fn main() {
 }
 
 fn project_root() -> Result<PathBuf, String> {
-    spider_web::find_project_root(&std::env::current_dir().map_err(|e| e.to_string())?)
-        .ok_or_else(|| "no web.toml found here or above — run inside a Spider project (spider new)".into())
+    spider_web::find_project_root(&std::env::current_dir().map_err(|e| e.to_string())?).ok_or_else(
+        || "no web.toml found here or above — run inside a Spider project (spider new)".into(),
+    )
 }
 
 fn cmd_install(args: &[String]) -> i32 {
@@ -57,8 +61,7 @@ fn cmd_install(args: &[String]) -> i32 {
         Ok(report) => {
             println!("installed {} {}", report.name, report.version);
             if !report.capabilities.is_empty() {
-                let mut caps: Vec<&str> =
-                    report.capabilities.iter().map(|s| s.as_str()).collect();
+                let mut caps: Vec<&str> = report.capabilities.iter().map(|s| s.as_str()).collect();
                 caps.sort();
                 println!("  capabilities it may use: {}", caps.join(", "));
             } else {
@@ -84,7 +87,10 @@ fn cmd_publish() -> i32 {
     };
     match spider_web::registry::publish(&root) {
         Ok(meta) => {
-            println!("published {} {} to the local registry", meta.name, meta.version);
+            println!(
+                "published {} {} to the local registry",
+                meta.name, meta.version
+            );
             0
         }
         Err(e) => {
@@ -115,7 +121,11 @@ fn cmd_audit() -> i32 {
                 } else {
                     format!("capabilities: {}", e.capabilities.join(", "))
                 };
-                let status = if e.intact { "ok" } else { "TAMPERED — reinstall it" };
+                let status = if e.intact {
+                    "ok"
+                } else {
+                    "TAMPERED — reinstall it"
+                };
                 println!("{} {}  ({caps})  [{status}]", e.name, e.version);
                 if !e.intact {
                     bad += 1;

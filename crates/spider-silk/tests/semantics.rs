@@ -195,11 +195,15 @@ fn list_operations_grid() {
         check(&format!("{typed}say xs.reverse()\n"), &format!("{rev:?}\n"));
         match items.first() {
             Some(f) => check(
-                &format!("{typed}match xs.first()\n    Some(v) -> say v\n    None -> say \"none\"\n"),
+                &format!(
+                    "{typed}match xs.first()\n    Some(v) -> say v\n    None -> say \"none\"\n"
+                ),
                 &format!("{f}\n"),
             ),
             None => check(
-                &format!("{typed}match xs.first()\n    Some(v) -> say v\n    None -> say \"none\"\n"),
+                &format!(
+                    "{typed}match xs.first()\n    Some(v) -> say v\n    None -> say \"none\"\n"
+                ),
                 "none\n",
             ),
         }
@@ -217,7 +221,10 @@ fn list_operations_grid() {
             &format!("{sum}\n"),
         );
     }
-    check("var xs = [1]\nxs.push(2)\nxs.push(3)\nsay xs\n", "[1, 2, 3]\n");
+    check(
+        "var xs = [1]\nxs.push(2)\nxs.push(3)\nsay xs\n",
+        "[1, 2, 3]\n",
+    );
     check("let n = [[1, 2], [3, 4]]\nsay n[1][0]\n", "3\n");
     check(
         "var n = [[1, 2], [3, 4]]\nn[0][1] = 9\nsay n\n",
@@ -268,10 +275,7 @@ fn while_repeat_and_if_grids() {
     }
     for n in 0..6 {
         let expected = "spin\n".repeat(n);
-        check(
-            &format!("repeat {n} times\n    say \"spin\"\n"),
-            &expected,
-        );
+        check(&format!("repeat {n} times\n    say \"spin\"\n"), &expected);
     }
     for age in [2_i64, 3, 12, 13, 30] {
         let label = if age >= 13 {
@@ -295,9 +299,7 @@ fn functions_grid() {
     for a in [-5_i64, 0, 3, 11] {
         for b in [-2_i64, 1, 6] {
             check(
-                &format!(
-                    "fn add(x: Int, y: Int) -> Int\n    return x + y\n\nsay add({a}, {b})\n"
-                ),
+                &format!("fn add(x: Int, y: Int) -> Int\n    return x + y\n\nsay add({a}, {b})\n"),
                 &format!("{}\n", a + b),
             );
         }
@@ -420,8 +422,14 @@ fn compound_assign_grid() {
 #[test]
 fn modules_math_random() {
     check("use math\nsay math.sqrt(9.0)\n", "3.0\n");
-    check("use math\nsay math.min(3, 7)\nsay math.max(3, 7)\n", "3\n7\n");
-    check("use math\nsay math.floor(2.9)\nsay math.round(2.5)\n", "2\n3\n");
+    check(
+        "use math\nsay math.min(3, 7)\nsay math.max(3, 7)\n",
+        "3\n7\n",
+    );
+    check(
+        "use math\nsay math.floor(2.9)\nsay math.round(2.5)\n",
+        "2\n3\n",
+    );
     // Seeded random is deterministic: same seed, same sequence.
     let out1 = spider_silk::run_capture(
         "use random\nrandom.seed(42)\nsay random.int(1, 100)\nsay random.int(1, 100)\n",

@@ -105,7 +105,10 @@ pub struct ModuleSrc<'a> {
     pub imports: HashMap<String, String>,
 }
 
-pub fn compile(parse: &Parse, preset_globals: Option<&HashMap<String, u16>>) -> Result<Program, String> {
+pub fn compile(
+    parse: &Parse,
+    preset_globals: Option<&HashMap<String, u16>>,
+) -> Result<Program, String> {
     let single = [ModuleSrc {
         name: "main".into(),
         parse,
@@ -140,11 +143,11 @@ pub fn compile_project(
     c.current_module = mods[entry].name.clone();
     c.compile_all(&mods[entry].parse.root)?;
     let main_key = format!("{}::main", mods[entry].name);
-    let main = c.fn_ids.get(&main_key).copied().filter(|&idx| {
-        c.protos
-            .get(idx as usize)
-            .is_some_and(|p| p.n_params == 0)
-    });
+    let main = c
+        .fn_ids
+        .get(&main_key)
+        .copied()
+        .filter(|&idx| c.protos.get(idx as usize).is_some_and(|p| p.n_params == 0));
     let n_globals = c
         .globals
         .values()
@@ -328,12 +331,16 @@ impl Compiler {
             let n = info.shape.fields.len() as u16;
             let proto = &mut self.protos[ctor];
             let cidx = proto.consts.len() as u32;
-            proto.consts.push(Value::Record(Rc::new(crate::value::RecordVal {
-                shape: info.shape.clone(),
-                fields: Vec::new(),
-            })));
+            proto
+                .consts
+                .push(Value::Record(Rc::new(crate::value::RecordVal {
+                    shape: info.shape.clone(),
+                    fields: Vec::new(),
+                })));
             proto.n_regs = n + 1;
-            proto.code.push(Instr::MakeRecord(n, cidx, (0..n).collect()));
+            proto
+                .code
+                .push(Instr::MakeRecord(n, cidx, (0..n).collect()));
             proto.code.push(Instr::Ret(n));
         }
         let variant_ctors: Vec<(u32, String, usize)> = self
@@ -347,7 +354,9 @@ impl Compiler {
             let cidx = proto.consts.len() as u32;
             proto.consts.push(Value::text(name));
             proto.n_regs = n + 1;
-            proto.code.push(Instr::MakeVariant(n, cidx, (0..n).collect()));
+            proto
+                .code
+                .push(Instr::MakeVariant(n, cidx, (0..n).collect()));
             proto.code.push(Instr::Ret(n));
         }
 
@@ -356,7 +365,11 @@ impl Compiler {
         let mut last = None;
         for stmt in root.child_nodes() {
             match stmt.kind {
-                K::FnDecl | K::RecordDecl | K::ChoiceDecl | K::ShapeDecl | K::UseDecl
+                K::FnDecl
+                | K::RecordDecl
+                | K::ChoiceDecl
+                | K::ShapeDecl
+                | K::UseDecl
                 | K::TestDecl => {}
                 _ => last = self.stmt(&mut fb, stmt)?,
             }
@@ -1108,8 +1121,8 @@ impl Compiler {
 
         if callee.kind == K::NameRef {
             let name = ident_of(callee).unwrap_or_default();
-            let is_local = fb.lookup(&name).is_some()
-                || (fb.is_entry && self.globals.contains_key(&name));
+            let is_local =
+                fb.lookup(&name).is_some() || (fb.is_entry && self.globals.contains_key(&name));
             if !is_local {
                 match name.as_str() {
                     "Ok" | "Fail" | "Some" => {
@@ -1145,7 +1158,8 @@ impl Compiler {
                 if name == "expect" {
                     let cidx = fb.const_val(Value::text("expect"));
                     let dst = fb.reg();
-                    fb.code.push(Instr::CallModule(dst, MODULE_BUILTIN, cidx, args));
+                    fb.code
+                        .push(Instr::CallModule(dst, MODULE_BUILTIN, cidx, args));
                     return Ok(dst);
                 }
             }

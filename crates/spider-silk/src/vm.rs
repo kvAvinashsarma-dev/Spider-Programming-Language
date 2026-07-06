@@ -202,7 +202,10 @@ impl<'a> Vm<'a> {
                 Instr::LoadGlobal(dst, g) => {
                     set!(
                         *dst,
-                        self.globals.get(*g as usize).cloned().unwrap_or(Value::Unit)
+                        self.globals
+                            .get(*g as usize)
+                            .cloned()
+                            .unwrap_or(Value::Unit)
                     )
                 }
                 Instr::StoreGlobal(g, src) => {
@@ -219,9 +222,11 @@ impl<'a> Vm<'a> {
                 }
                 Instr::Neg(dst, a) => {
                     let v = match reg!(*a) {
-                        Value::Int(i) => Value::Int(i.checked_neg().ok_or_else(|| {
-                            err("E0302", "negating this number overflows Int")
-                        })?),
+                        Value::Int(i) => {
+                            Value::Int(i.checked_neg().ok_or_else(|| {
+                                err("E0302", "negating this number overflows Int")
+                            })?)
+                        }
                         Value::Float(f) => Value::Float(-f),
                         other => return Err(internal(format!("negating {}", other.kind_name()))),
                     };
@@ -532,9 +537,9 @@ impl<'a> Vm<'a> {
                 let span = (hi - lo).unsigned_abs().saturating_add(1);
                 Ok(Value::Int(lo + (self.next_rng() % span) as i64))
             }
-            (MODULE_RANDOM, "float") => {
-                Ok(Value::Float((self.next_rng() >> 11) as f64 / (1u64 << 53) as f64))
-            }
+            (MODULE_RANDOM, "float") => Ok(Value::Float(
+                (self.next_rng() >> 11) as f64 / (1u64 << 53) as f64,
+            )),
             (MODULE_FILES, _) => self.files_call(name, args),
             (MODULE_BUILTIN, "expect") => {
                 let (Some(actual), Some(expected)) = (args.first(), args.get(1)) else {
@@ -653,8 +658,7 @@ fn bin(op: BinOp, a: &Value, b: &Value) -> Result<Value, RuntimeError> {
         Eq => return Ok(Value::Bool(value_eq(a, b))),
         Ne => return Ok(Value::Bool(!value_eq(a, b))),
         Lt | Le | Gt | Ge => {
-            let ord = value_cmp(a, b)
-                .ok_or_else(|| internal("comparing unordered values"))?;
+            let ord = value_cmp(a, b).ok_or_else(|| internal("comparing unordered values"))?;
             let res = match op {
                 Lt => ord == Ordering::Less,
                 Le => ord != Ordering::Greater,

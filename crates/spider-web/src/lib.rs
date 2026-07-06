@@ -27,7 +27,10 @@ pub enum ProjectError {
 }
 
 /// Full front half for a project: load -> check -> compile.
-pub fn prepare_project(project: &Project, policy: &CapPolicy) -> Result<ProjectPrepared, ProjectError> {
+pub fn prepare_project(
+    project: &Project,
+    policy: &CapPolicy,
+) -> Result<ProjectPrepared, ProjectError> {
     // Parse errors first, per file.
     let mut parse_errors = Vec::new();
     for (i, m) in project.modules.iter().enumerate() {
@@ -63,8 +66,8 @@ pub fn prepare_project(project: &Project, policy: &CapPolicy) -> Result<ProjectP
             imports: m.imports.clone(),
         })
         .collect();
-    let program = spider_silk::compile_project(&srcs, project.entry, None)
-        .map_err(ProjectError::Internal)?;
+    let program =
+        spider_silk::compile_project(&srcs, project.entry, None).map_err(ProjectError::Internal)?;
     Ok(ProjectPrepared { program, warnings })
 }
 
@@ -179,7 +182,10 @@ mod tests {
     fn modules_cannot_run_top_level_code() {
         let dir = temp_dir("toplevel");
         make_project(&dir, "app", "");
-        write(&dir.join("src").join("main.sp"), "use helpers\nsay helpers.f()\n");
+        write(
+            &dir.join("src").join("main.sp"),
+            "use helpers\nsay helpers.f()\n",
+        );
         write(
             &dir.join("src").join("helpers.sp"),
             "say \"surprise!\"\n\npublic fn f() -> Int\n    return 1\n",
@@ -192,7 +198,10 @@ mod tests {
     fn import_cycles_are_explained() {
         let dir = temp_dir("cycle");
         make_project(&dir, "app", "");
-        write(&dir.join("src").join("main.sp"), "use alpha\nsay alpha.f()\n");
+        write(
+            &dir.join("src").join("main.sp"),
+            "use alpha\nsay alpha.f()\n",
+        );
         write(
             &dir.join("src").join("alpha.sp"),
             "use beta\npublic fn f() -> Int\n    return beta.g()\n",
@@ -255,7 +264,12 @@ mod tests {
         );
         let report = registry::install(&app, "greetings").unwrap();
         assert_eq!(report.name, "greetings");
-        assert!(app.join("web_modules").join("greetings").join("src").join("lib.sp").is_file());
+        assert!(app
+            .join("web_modules")
+            .join("greetings")
+            .join("src")
+            .join("lib.sp")
+            .is_file());
         let lock = fs::read_to_string(app.join("web.lock")).unwrap();
         assert!(lock.contains("greetings 0.1.0"), "{lock}");
         let manifest = fs::read_to_string(app.join("web.toml")).unwrap();
@@ -272,7 +286,10 @@ mod tests {
 
         // Tamper -> audit catches it.
         write(
-            &app.join("web_modules").join("greetings").join("src").join("lib.sp"),
+            &app.join("web_modules")
+                .join("greetings")
+                .join("src")
+                .join("lib.sp"),
             "public fn hello(name: Text) -> Text\n    return \"pwned\"\n",
         );
         let audit = registry::audit(&app).unwrap();

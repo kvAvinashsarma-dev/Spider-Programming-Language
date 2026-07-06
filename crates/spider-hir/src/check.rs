@@ -130,13 +130,15 @@ pub fn check_project(
         }
         let mut mod_exports = HashMap::new();
         for (fname, sig) in &c.fns {
-            let is_ctor =
-                c.records.contains_key(fname) || c.variant_of.contains_key(fname);
+            let is_ctor = c.records.contains_key(fname) || c.variant_of.contains_key(fname);
             if is_ctor {
                 ctor_fns.entry(fname.clone()).or_insert_with(|| sig.clone());
             } else {
                 let is_public = c.public_fns.contains(fname);
-                mod_exports.insert(fname.clone(), (sig.params.clone(), sig.ret.clone(), is_public));
+                mod_exports.insert(
+                    fname.clone(),
+                    (sig.params.clone(), sig.ret.clone(), is_public),
+                );
             }
         }
         exports.insert(m.name.clone(), mod_exports);
@@ -254,18 +256,30 @@ impl Checker {
 
     fn err(&mut self, node: &Rc<Node>, code: &'static str, msg: impl Into<String>) {
         let (start, end) = self.span_override.unwrap_or_else(|| self.spans.of(node));
-        self.diags
-            .push(Diagnostic::error(code, msg, start, end.saturating_sub(start)));
+        self.diags.push(Diagnostic::error(
+            code,
+            msg,
+            start,
+            end.saturating_sub(start),
+        ));
     }
 
     fn warn(&mut self, span: (usize, usize), code: &'static str, msg: impl Into<String>) {
-        self.diags
-            .push(Diagnostic::warning(code, msg, span.0, span.1.saturating_sub(span.0)));
+        self.diags.push(Diagnostic::warning(
+            code,
+            msg,
+            span.0,
+            span.1.saturating_sub(span.0),
+        ));
     }
 
     fn err_span(&mut self, span: (usize, usize), code: &'static str, msg: impl Into<String>) {
-        self.diags
-            .push(Diagnostic::error(code, msg, span.0, span.1.saturating_sub(span.0)));
+        self.diags.push(Diagnostic::error(
+            code,
+            msg,
+            span.0,
+            span.1.saturating_sub(span.0),
+        ));
     }
 
     fn show(&self, t: &Ty) -> String {
@@ -389,7 +403,10 @@ impl Checker {
                                 "`{first}` is not a standard-library module{}",
                                 self.suggestion(
                                     first,
-                                    &STD_MODULES.iter().map(|s| s.to_string()).collect::<Vec<_>>()
+                                    &STD_MODULES
+                                        .iter()
+                                        .map(|s| s.to_string())
+                                        .collect::<Vec<_>>()
                                 )
                             );
                             let span = self.spans.of(n);
@@ -567,7 +584,10 @@ impl Checker {
                 params.push(ty);
             }
         }
-        let ret = match n.find_node(K::RetType).and_then(|rt| rt.find_node(K::TypeRef)) {
+        let ret = match n
+            .find_node(K::RetType)
+            .and_then(|rt| rt.find_node(K::TypeRef))
+        {
             Some(t) => self.resolve_type(t, &rigids),
             None => Ty::Unit,
         };
@@ -596,7 +616,11 @@ impl Checker {
             "List" => match arg(0) {
                 Some(inner) => Ty::List(Box::new(inner)),
                 None => {
-                    self.err(t, "E0209", "`List` needs an item type — for example `List of Int`");
+                    self.err(
+                        t,
+                        "E0209",
+                        "`List` needs an item type — for example `List of Int`",
+                    );
                     Ty::Any
                 }
             },
@@ -614,7 +638,11 @@ impl Checker {
             "Maybe" => match arg(0) {
                 Some(inner) => Ty::Maybe(Box::new(inner)),
                 None => {
-                    self.err(t, "E0209", "`Maybe` needs an inner type — for example `Maybe of Text`");
+                    self.err(
+                        t,
+                        "E0209",
+                        "`Maybe` needs an inner type — for example `Maybe of Text`",
+                    );
                     Ty::Any
                 }
             },
@@ -1386,18 +1414,12 @@ impl Checker {
                 .find_token(K::Ident)
                 .map(|t| t.text.clone())
                 .unwrap_or_default();
-            if self
-                .scopes
-                .iter()
-                .rev()
-                .all(|s| !s.contains_key(&name))
-            {
+            if self.scopes.iter().rev().all(|s| !s.contains_key(&name)) {
                 // Built-in generic constructors.
                 match name.as_str() {
                     "Ok" | "Fail" | "Some" => {
                         if args.len() != 1 {
-                            let msg =
-                                format!("`{name}` takes 1 argument, but got {}", args.len());
+                            let msg = format!("`{name}` takes 1 argument, but got {}", args.len());
                             self.err(n, "E0216", msg);
                         }
                         let payload = match args.first() {
@@ -1422,8 +1444,10 @@ impl Checker {
                 // The global builtin `expect(actual, expected)`.
                 if name == "expect" {
                     if args.len() != 2 {
-                        let msg =
-                            format!("`expect` takes 2 arguments (actual, expected), but got {}", args.len());
+                        let msg = format!(
+                            "`expect` takes 2 arguments (actual, expected), but got {}",
+                            args.len()
+                        );
                         self.err(n, "E0216", msg);
                     }
                     let a = args.first().map(|x| self.ty_of(x)).unwrap_or(Ty::Any);
@@ -1449,10 +1473,7 @@ impl Checker {
         let callee_ty = self.ty_of(callee);
         match self.uni.resolve(&callee_ty) {
             Ty::Fn(params, ret) => {
-                let sig = FnSig {
-                    params,
-                    ret: *ret,
-                };
+                let sig = FnSig { params, ret: *ret };
                 self.check_call_against("this function", &sig, &args, n)
             }
             Ty::Any => {
@@ -1593,9 +1614,7 @@ impl Checker {
                         self.suggestion(&method, &members)
                     )
                 } else {
-                    format!(
-                        "the `{bname}` module has no members in this Spider version yet"
-                    )
+                    format!("the `{bname}` module has no members in this Spider version yet")
                 };
                 self.err(callee, "E0306", msg);
                 return Ty::Any;
@@ -1619,10 +1638,7 @@ impl Checker {
                 for a in args {
                     self.ty_of(a);
                 }
-                let msg = format!(
-                    "{} has no method named `{method}`",
-                    self.show(&resolved)
-                );
+                let msg = format!("{} has no method named `{method}`", self.show(&resolved));
                 self.err(callee, "E0221", msg);
                 Ty::Any
             }
@@ -1648,9 +1664,8 @@ impl Checker {
                 && self.scopes.iter().rev().all(|s| !s.contains_key(&bname))
             {
                 if self.user_modules.contains_key(&bname) {
-                    let msg = format!(
-                        "modules share functions — call one with `{bname}.{field}(…)`"
-                    );
+                    let msg =
+                        format!("modules share functions — call one with `{bname}.{field}(…)`");
                     self.err(n, "E0306", msg);
                     return Ty::Any;
                 }
@@ -1949,10 +1964,7 @@ impl Checker {
                     self.check_pattern_fields(pat, &name, &fields, &subs, has_parens);
                     return Some(vname.to_string());
                 }
-                let looks_like_case = name
-                    .chars()
-                    .next()
-                    .is_some_and(|c| c.is_ascii_uppercase());
+                let looks_like_case = name.chars().next().is_some_and(|c| c.is_ascii_uppercase());
                 if let Ty::Maybe(_) | Ty::Outcome(_) = &resolved {
                     if has_parens || looks_like_case {
                         let names: Vec<String> = match &resolved {
@@ -1979,8 +1991,7 @@ impl Checker {
                     // snake_case. A capitalized unknown here is a misspelled
                     // case, not a catch-all.
                     if has_parens || looks_like_case {
-                        let names: Vec<String> =
-                            variants.iter().map(|(v, _)| v.clone()).collect();
+                        let names: Vec<String> = variants.iter().map(|(v, _)| v.clone()).collect();
                         let msg = format!(
                             "`{cname}` has no case named `{name}`{}",
                             self.suggestion(&name, &names)

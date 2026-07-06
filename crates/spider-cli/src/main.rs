@@ -65,7 +65,9 @@ fn print_help() {
 
 /// Splits `--allow <cap>` / `--allow cap1,cap2` flags out of an argument
 /// list; validates capability names against the known set.
-fn split_allow(args: &[String]) -> Result<(Vec<String>, std::collections::HashSet<String>), String> {
+fn split_allow(
+    args: &[String],
+) -> Result<(Vec<String>, std::collections::HashSet<String>), String> {
     let mut rest = Vec::new();
     let mut caps = std::collections::HashSet::new();
     let mut i = 0;
@@ -160,7 +162,10 @@ fn cmd_run(args: &[String]) -> i32 {
         Ok(prepared) => {
             for (i, w) in &prepared.warnings {
                 let m = &project.modules[*i];
-                eprint!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), w));
+                eprint!(
+                    "{}",
+                    spider_syntax::render(&m.src, &m.path.display().to_string(), w)
+                );
                 eprintln!();
             }
             let mut io = spider_silk::ConsoleIo;
@@ -187,7 +192,10 @@ fn render_project_error(project: &spider_web::Project, err: spider_web::ProjectE
         spider_web::ProjectError::Diagnostics(diags) => {
             for (i, d) in &diags {
                 let m = &project.modules[*i];
-                eprint!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), d));
+                eprint!(
+                    "{}",
+                    spider_syntax::render(&m.src, &m.path.display().to_string(), d)
+                );
                 eprintln!();
             }
             eprintln!("{} problem(s) — nothing was run", diags.len());
@@ -251,10 +259,17 @@ fn cmd_test(args: &[String]) -> i32 {
         let prepared = match spider_web::prepare_project(&project, &policy) {
             Ok(p) => p,
             Err(spider_web::ProjectError::Diagnostics(diags)) => {
-                eprintln!("{}: {} problem(s) — its tests cannot run:", file.display(), diags.len());
+                eprintln!(
+                    "{}: {} problem(s) — its tests cannot run:",
+                    file.display(),
+                    diags.len()
+                );
                 if let Some((i, d)) = diags.first() {
                     let m = &project.modules[*i];
-                    eprint!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), d));
+                    eprint!(
+                        "{}",
+                        spider_syntax::render(&m.src, &m.path.display().to_string(), d)
+                    );
                 }
                 broken += 1;
                 continue;
@@ -443,7 +458,8 @@ fn require_file(args: &[String], what: &str) -> Option<PathBuf> {
 fn collect_sp_files(path: &Path, out: &mut Vec<PathBuf>) {
     if path.is_dir() {
         if let Ok(entries) = fs::read_dir(path) {
-            let mut paths: Vec<PathBuf> = entries.filter_map(|e| e.ok()).map(|e| e.path()).collect();
+            let mut paths: Vec<PathBuf> =
+                entries.filter_map(|e| e.ok()).map(|e| e.path()).collect();
             paths.sort();
             for p in paths {
                 let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
@@ -510,7 +526,10 @@ fn cmd_fmt(args: &[String]) -> i32 {
                 );
                 let shown = diags.len().min(3);
                 for d in &diags[..shown] {
-                    eprint!("{}", spider_syntax::render(&src, &file.display().to_string(), d));
+                    eprint!(
+                        "{}",
+                        spider_syntax::render(&src, &file.display().to_string(), d)
+                    );
                 }
                 failed += 1;
             }
@@ -576,7 +595,10 @@ fn cmd_check(args: &[String]) -> i32 {
     }
     for (i, d) in &diags {
         let m = &project.modules[*i];
-        print!("{}", spider_syntax::render(&m.src, &m.path.display().to_string(), d));
+        print!(
+            "{}",
+            spider_syntax::render(&m.src, &m.path.display().to_string(), d)
+        );
         println!();
     }
     let errors = diags.iter().filter(|(_, d)| d.is_error()).count();

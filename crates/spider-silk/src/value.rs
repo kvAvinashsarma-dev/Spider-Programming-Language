@@ -129,8 +129,7 @@ pub fn display(v: &Value, quote_text: bool) -> String {
             if var.fields.is_empty() {
                 var.tag.to_string()
             } else {
-                let parts: Vec<String> =
-                    var.fields.iter().map(|f| display(f, true)).collect();
+                let parts: Vec<String> = var.fields.iter().map(|f| display(f, true)).collect();
                 format!("{}({})", var.tag, parts.join(", "))
             }
         }
@@ -160,12 +159,18 @@ pub fn value_eq(a: &Value, b: &Value) -> bool {
         }
         (Value::Record(x), Value::Record(y)) => {
             x.shape.name == y.shape.name
-                && x.fields.iter().zip(y.fields.iter()).all(|(a, b)| value_eq(a, b))
+                && x.fields
+                    .iter()
+                    .zip(y.fields.iter())
+                    .all(|(a, b)| value_eq(a, b))
         }
         (Value::Variant(x), Value::Variant(y)) => {
             x.tag == y.tag
                 && x.fields.len() == y.fields.len()
-                && x.fields.iter().zip(y.fields.iter()).all(|(a, b)| value_eq(a, b))
+                && x.fields
+                    .iter()
+                    .zip(y.fields.iter())
+                    .all(|(a, b)| value_eq(a, b))
         }
         (Value::FnRef(x), Value::FnRef(y)) => x == y,
         _ => false,

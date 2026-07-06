@@ -22,7 +22,12 @@ pub struct Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn error(code: &'static str, message: impl Into<String>, offset: usize, len: usize) -> Self {
+    pub fn error(
+        code: &'static str,
+        message: impl Into<String>,
+        offset: usize,
+        len: usize,
+    ) -> Self {
         Diagnostic {
             code,
             message: message.into(),
@@ -84,7 +89,10 @@ fn source_line(src: &str, line: usize) -> String {
 pub fn render(src: &str, file: &str, d: &Diagnostic) -> String {
     let (line, col) = line_col(src, d.offset);
     let text = source_line(src, line);
-    let caret_len = d.len.min(text.chars().count().saturating_sub(col - 1)).max(1);
+    let caret_len = d
+        .len
+        .min(text.chars().count().saturating_sub(col - 1))
+        .max(1);
     let head = match d.severity {
         Severity::Error => "error",
         Severity::Warning => "warning",
@@ -508,7 +516,10 @@ mod tests {
     #[test]
     fn every_listed_code_is_authored_and_top_50_gate_met() {
         for code in ALL_CODES {
-            assert!(explain(code).is_some(), "code {code} listed but not authored");
+            assert!(
+                explain(code).is_some(),
+                "code {code} listed but not authored"
+            );
         }
         assert!(
             authored_code_count() >= 50,

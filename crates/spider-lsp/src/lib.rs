@@ -145,10 +145,7 @@ impl Server {
 
     fn hover(&self, msg: &Json) -> Option<String> {
         let params = msg.get("params")?;
-        let uri = params
-            .get("textDocument")?
-            .get("uri")?
-            .as_str()?;
+        let uri = params.get("textDocument")?.get("uri")?.as_str()?;
         let line = params.get("position")?.get("line")?.as_f64()? as usize;
         let character = params.get("position")?.get("character")?.as_f64()? as usize;
         let text = self.docs.get(uri)?;
@@ -220,9 +217,9 @@ fn word_at(text: &str, line: usize, character: usize) -> Option<String> {
 fn completion_items() -> String {
     let mut items: Vec<String> = Vec::new();
     for kw in [
-        "let", "var", "fn", "if", "else", "for", "in", "to", "while", "repeat", "times",
-        "match", "try", "use", "return", "say", "ask", "record", "choice", "shape", "test",
-        "public", "spawn", "do", "together", "and", "or", "not", "true", "false", "expect",
+        "let", "var", "fn", "if", "else", "for", "in", "to", "while", "repeat", "times", "match",
+        "try", "use", "return", "say", "ask", "record", "choice", "shape", "test", "public",
+        "spawn", "do", "together", "and", "or", "not", "true", "false", "expect",
     ] {
         let doc = spider_syntax::concepts::concept(kw).unwrap_or("");
         items.push(format!(

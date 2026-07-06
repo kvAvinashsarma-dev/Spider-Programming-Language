@@ -53,9 +53,7 @@ mod tests {
 
     #[test]
     fn clean_inference_end_to_end() {
-        assert_clean(
-            "fn double(x: Int) -> Int\n    return x * 2\n\nsay double(21)\n",
-        );
+        assert_clean("fn double(x: Int) -> Int\n    return x * 2\n\nsay double(21)\n");
         assert_clean("let xs = [1, 2, 3]\nfor x in xs\n    say x + 1\n");
         assert_clean("let empty: List of Text = []\nsay empty.length()\n");
         assert_clean("let m = {\"a\": 1}\nsay m[\"a\"] + 1\n");
@@ -156,10 +154,7 @@ mod tests {
             ),
             "E0234",
         );
-        assert_has(
-            "match 1\n    1 -> 2\n    other -> \"x\"\n",
-            "E0240",
-        );
+        assert_has("match 1\n    1 -> 2\n    other -> \"x\"\n", "E0240");
     }
 
     #[test]

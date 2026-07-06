@@ -90,8 +90,8 @@ h2 .grad { color: var(--accent2); }
 
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
-.card .icon { font-size: 26px; margin-bottom: 12px; }
 .card h3 { font-size: 16px; margin-bottom: 8px; }
+.card h3::before { content: ""; display: block; width: 30px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), #6366f1); margin-bottom: 16px; }
 .card p { color: var(--muted); font-size: 14px; }
 
 /* table */

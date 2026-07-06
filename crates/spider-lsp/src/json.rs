@@ -167,8 +167,7 @@ impl Parser {
                                 for _ in 0..4 {
                                     low = low * 16 + self.bump()?.to_digit(16)?;
                                 }
-                                let combined =
-                                    0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00);
+                                let combined = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00);
                                 out.push(char::from_u32(combined)?);
                             } else {
                                 return None;
@@ -186,10 +185,7 @@ impl Parser {
 
     fn number(&mut self) -> Option<Json> {
         let start = self.pos;
-        while matches!(
-            self.peek(),
-            Some('0'..='9' | '-' | '+' | '.' | 'e' | 'E')
-        ) {
+        while matches!(self.peek(), Some('0'..='9' | '-' | '+' | '.' | 'e' | 'E')) {
             self.pos += 1;
         }
         let text: String = self.chars[start..self.pos].iter().collect();

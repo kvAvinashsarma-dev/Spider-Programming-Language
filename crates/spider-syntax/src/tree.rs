@@ -60,13 +60,8 @@ impl Node {
                     | SyntaxKind::Dedent
                     | SyntaxKind::Eof => {}
                     _ => {
-                        let _ = writeln!(
-                            out,
-                            "{}{:?} {:?}",
-                            "  ".repeat(depth + 1),
-                            t.kind,
-                            t.text
-                        );
+                        let _ =
+                            writeln!(out, "{}{:?} {:?}", "  ".repeat(depth + 1), t.kind, t.text);
                     }
                 },
             }

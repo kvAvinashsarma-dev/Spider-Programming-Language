@@ -190,7 +190,11 @@ pub fn method_docs() -> Vec<MethodDoc> {
     vec![
         d("Int", "to_float", "This whole number as a Float."),
         d("Int", "abs", "The distance from zero — always positive."),
-        d("Float", "to_int", "Cuts off the decimal part, keeping the whole number."),
+        d(
+            "Float",
+            "to_int",
+            "Cuts off the decimal part, keeping the whole number.",
+        ),
         d("Float", "round", "The nearest whole number."),
         d("Float", "floor", "Rounds down to the nearest whole number."),
         d("Float", "abs", "The distance from zero — always positive."),
@@ -198,18 +202,46 @@ pub fn method_docs() -> Vec<MethodDoc> {
         d("Text", "upper", "The same text in UPPERCASE."),
         d("Text", "lower", "The same text in lowercase."),
         d("Text", "trim", "The text without spaces at either end."),
-        d("Text", "contains", "True if the other text appears inside this one."),
-        d("Text", "split", "Cuts the text at every separator into a List of Text."),
+        d(
+            "Text",
+            "contains",
+            "True if the other text appears inside this one.",
+        ),
+        d(
+            "Text",
+            "split",
+            "Cuts the text at every separator into a List of Text.",
+        ),
         d("List", "length", "How many items the list holds."),
-        d("List", "first", "Maybe the first item — None when the list is empty."),
-        d("List", "last", "Maybe the last item — None when the list is empty."),
-        d("List", "sort", "A new list with the items in order, smallest first."),
-        d("List", "reverse", "A new list with the items in the opposite order."),
+        d(
+            "List",
+            "first",
+            "Maybe the first item — None when the list is empty.",
+        ),
+        d(
+            "List",
+            "last",
+            "Maybe the last item — None when the list is empty.",
+        ),
+        d(
+            "List",
+            "sort",
+            "A new list with the items in order, smallest first.",
+        ),
+        d(
+            "List",
+            "reverse",
+            "A new list with the items in the opposite order.",
+        ),
         d("List", "push", "Adds an item to the end of this list."),
         d("List", "contains", "True if the item appears in the list."),
         d("Map", "length", "How many key-value pairs the map holds."),
         d("Map", "keys", "All the keys, in the order they were added."),
-        d("Map", "values", "All the values, in the order they were added."),
+        d(
+            "Map",
+            "values",
+            "All the values, in the order they were added.",
+        ),
         d("Map", "has", "True if the map holds this key."),
     ]
 }
