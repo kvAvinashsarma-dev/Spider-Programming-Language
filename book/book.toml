@@ -7,8 +7,8 @@ src = "src"
 
 [output.html]
 git-repository-url = "https://github.com/kvAvinashsarma-dev/Spider-Programming-Language"
-edit-url-template = "https://github.com/kvAvinashsarma-dev/Spider-Programming-Language/edit/main/book/{path}"
-site-url = "/Spider-Programming-Language/"
+edit-url-template = "https://github.com/kvAvinashsarma-dev/Spider-Programming-Language/edit/master/book/{path}"
+site-url = "/book/"
 
 [output.html.playground]
 editable = true

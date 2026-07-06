@@ -7,6 +7,10 @@ write and run real Spider in your browser (the actual compiler + Silk VM as
 WebAssembly), and learn to code at
 [spider-lang.vercel.app/learn](https://spider-lang.vercel.app/learn).
 
+**📖 The Book — official documentation: [spider-lang.vercel.app/book](https://spider-lang.vercel.app/book/)** —
+40+ chapters: tutorials, full language and standard-library reference,
+compiler/VM internals, and a contributor guide. Source in [`book/`](book/).
+
 **Spider** is a new programming language with one uncompromising thesis: the easiest
 language in the world to learn, read, and debug can also be a production-grade,
 memory-safe, natively-compiled systems platform. Easy surface. Industrial core.
