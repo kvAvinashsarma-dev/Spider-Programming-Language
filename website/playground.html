@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spider Playground — code in your browser</title>
+<meta name="description" content="Write and run real Spider code in your browser. The actual compiler and Silk VM, compiled to WebAssembly.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕷️</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="mark">🕷️</span> SPIDER</a>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a href="playground.html" class="active">Playground</a>
+      <a href="learn.html">Learn</a>
+      <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language#readme" target="_blank">Docs</a>
+    </div>
+    <a class="btn ghost" href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">★ GitHub</a>
+  </div>
+</nav>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">THE PLAYGROUND</p>
+    <h2>Write Spider. <span class="grad">Run it right here.</span></h2>
+    <p class="lead">This is the real Spider compiler and Silk VM compiled to WebAssembly — the same code as <code>spider run</code>. Your programs run on your machine; nothing is uploaded.</p>
+
+    <div class="pgbar">
+      <select id="pg-examples">
+        <option value="hello">Example: Hello &amp; ask</option>
+        <option value="shapes">Example: records, choices &amp; match</option>
+        <option value="outcomes">Example: Outcome &amp; try (no exceptions)</option>
+        <option value="loops">Example: loops &amp; recursion</option>
+        <option value="teacher">Example: make a mistake — get taught</option>
+        <option value="safety">Example: Safe Mode says no, politely</option>
+      </select>
+      <input id="pg-input" placeholder="answers for ask — one per line" value="Ada">
+      <button class="btn" id="pg-run">▶ Run (Ctrl+Enter)</button>
+    </div>
+
+    <div class="pg">
+      <textarea id="pg-src" class="editor" spellcheck="false">say "Hello, world! 🕷️"
+
+let name = ask "What is your name?"
+say "Welcome to Spider, {name}!"
+</textarea>
+      <div id="pg-out" class="outbox">loading the engine…</div>
+    </div>
+    <p class="hint" id="pg-status" style="margin-top:10px">loading the Spider engine (~500 KB, once)…</p>
+
+    <div style="margin-top:40px">
+      <h3 style="margin-bottom:10px">Cheat sheet</h3>
+      <div class="grid">
+        <div class="card"><h3>Values</h3><p><code>let pi = 3.14</code> (fixed) · <code>var score = 0</code> (changeable) · text weaves values: <code>say "hi {name}"</code></p></div>
+        <div class="card"><h3>Flow</h3><p><code>if / else</code> · <code>for item in items</code> · <code>for i in 1 to 10</code> · <code>repeat 3 times</code> · <code>while</code> · blocks are 4 spaces</p></div>
+        <div class="card"><h3>Data</h3><p><code>record Point</code> · <code>choice Shape</code> · <code>match</code> must cover every case · <code>Maybe</code> instead of null · <code>Outcome</code> + <code>try</code> instead of exceptions</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>🕷️ <strong>Spider</strong> — spin something. · <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">Source on GitHub</a></div>
+    <div>Founded by <a href="https://linkedin.com/in/avinashsarma" target="_blank">Kv Avinash Sarma</a> · co-authored with Claude</div>
+  </div>
+</footer>
+
+<script src="spider.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "cleanUrls": true,
+  "headers": [
+    { "source": "/spider.wasm", "headers": [ { "key": "Content-Type", "value": "application/wasm" }, { "key": "Cache-Control", "value": "public, max-age=86400" } ] }
+  ]
+}

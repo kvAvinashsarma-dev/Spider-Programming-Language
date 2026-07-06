@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spider — Programming Made Human</title>
+<meta name="description" content="Spider is a programming language designed to be simple enough for anyone to learn, yet honest and safe enough for professionals. Founded by Kv Avinash Sarma, co-authored with Claude.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕷️</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="mark">🕷️</span> SPIDER</a>
+    <div class="links">
+      <a href="index.html" class="active">Home</a>
+      <a href="playground.html">Playground</a>
+      <a href="learn.html">Learn</a>
+      <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language#readme" target="_blank">Docs</a>
+      <a href="index.html#roadmap">Roadmap</a>
+      <a href="index.html#founder">Founder</a>
+    </div>
+    <a class="btn ghost" href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">★ Star on GitHub</a>
+    <a class="btn" href="playground.html">Try Spider</a>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <div>
+    <span class="pill">A LANGUAGE BUILT TO BE LEARNED</span>
+    <h1>Programming<br><span class="grad">Made Human.</span></h1>
+    <p class="sub">Spider is designed to be simple enough for anyone to learn, yet honest and safe enough for professionals. Its compiler doesn't judge your code — it teaches you.</p>
+    <div class="cta">
+      <a class="btn" href="playground.html">▶ Try the Playground</a>
+      <a class="btn ghost" href="learn.html">Learn to Code</a>
+    </div>
+    <div class="badges">
+      <span>Easy to learn</span>
+      <span>Teaching compiler</span>
+      <span>Safe by default</span>
+      <span>20 ms cold start</span>
+    </div>
+  </div>
+  <div class="spider-art">🕷️</div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">REAL SPIDER CODE</p>
+    <h2>Reads like thought. <span class="grad">Runs like a language should.</span></h2>
+    <p class="lead">This is genuine Spider — no null, no exceptions, no semicolons, no ceremony. Every piece below runs today, including in your browser.</p>
+    <div class="pg">
+      <div class="codewin">
+        <div class="bar"><span class="dot" style="background:#f87171"></span><span class="dot" style="background:#fbbf24"></span><span class="dot" style="background:#34d399"></span>&nbsp; main.sp</div>
+<pre><span class="k">choice</span> Shape
+    Circle(radius: <span class="f">Float</span>)
+    Rect(width: <span class="f">Float</span>, height: <span class="f">Float</span>)
+
+<span class="k">fn</span> area(shape: Shape) -&gt; <span class="f">Float</span>
+    <span class="k">match</span> shape
+        Circle(r) -&gt; <span class="n">3.14159</span> * r * r
+        Rect(w, h) -&gt; w * h
+
+<span class="k">for</span> shape <span class="k">in</span> [Circle(<span class="n">1.0</span>), Rect(<span class="n">2.0</span>, <span class="n">3.0</span>)]
+    <span class="k">say</span> <span class="s">"area: {area(shape)}"</span></pre>
+      </div>
+      <div class="codewin">
+        <div class="bar"><span class="dot" style="background:#34d399"></span>&nbsp; when you make a mistake, Spider teaches</div>
+<pre><span class="c">error[E0201]: nothing named `totl` exists here
+              — did you mean `total`?</span>
+  --&gt; main.sp:2:5
+   |
+ 2 | say totl
+   |     ^^^^
+<span class="s">what happened:</span> this name is not known here.
+<span class="s">why:</span> every name must be created before
+     it is used.
+<span class="s">how to fix:</span> check the spelling — the
+     message suggests the closest name.</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">FEATURES</p>
+    <h2>Everything you need to <span class="grad">learn and build.</span></h2>
+    <p class="lead">Every claim below is implemented, tested, and in the open-source repo — nothing on this page is a mockup.</p>
+    <div class="grid">
+      <div class="card"><div class="icon">📖</div><h3>A compiler that teaches</h3><p>72 authored diagnostics, each explaining what happened, why, and how to fix it — with "did you mean…?" on every unknown name.</p></div>
+      <div class="card"><div class="icon">🛡️</div><h3>Safe by default</h3><p>No null, no exceptions, checked integer overflow, and capability security: programs can't touch files or the network unless you say so.</p></div>
+      <div class="card"><div class="icon">⚡</div><h3>Fast feedback</h3><p>The Silk VM cold-starts in ~20 ms — measured in CI against a 50 ms budget. Your code runs the moment you press Enter.</p></div>
+      <div class="card"><div class="icon">📦</div><h3>Packages with a conscience</h3><p><code>web install</code> refuses any dependency that wants more capabilities than your project allows — the escalation is spelled out.</p></div>
+      <div class="card"><div class="icon">🧰</div><h3>Whole toolchain, day one</h3><p>Runner, REPL, test framework, zero-config formatter, and a language server for live errors and teaching hovers in any editor.</p></div>
+      <div class="card"><div class="icon">🔬</div><h3>Honest engineering</h3><p>Spec-first, milestone-gated, 1,120+ semantics tests, and every limitation written down. The ADR log is public.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">RUN SPIDER CODE INSTANTLY</p>
+    <h2>Try <span class="grad">Spider</span> in your browser.</h2>
+    <p class="lead">The playground runs the <em>actual</em> Spider compiler and Silk VM, compiled to WebAssembly — the same 500 KB of Rust that powers <code>spider run</code>. Nothing is faked or sent to a server.</p>
+    <p style="text-align:center"><a class="btn" href="playground.html">🕸️ Open the Playground</a>&nbsp;&nbsp;<a class="btn ghost" href="learn.html">Start the lessons</a></p>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">SPIDER VS OTHERS</p>
+    <h2>How <span class="grad">Spider</span> compares.</h2>
+    <table>
+      <tr><th>Feature</th><th>Spider</th><th>Python</th><th>JavaScript</th><th>Rust</th></tr>
+      <tr><td>Errors that explain what / why / how to fix</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td><td class="part">partial</td></tr>
+      <tr><td>Easy for a beginner's first week</td><td class="yes">✓</td><td class="yes">✓</td><td class="part">partial</td><td class="no">✗</td></tr>
+      <tr><td>No null / no exceptions by design</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td></tr>
+      <tr><td>Capability security by default</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+      <tr><td>Checked integer overflow</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td><td class="part">debug only</td></tr>
+      <tr><td>Exhaustive match, checked by the compiler</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td></tr>
+      <tr><td>Native machine code</td><td class="part">planned (M8)</td><td class="no">✗</td><td class="part">JIT</td><td class="yes">✓</td></tr>
+    </table>
+    <p class="footnote">Honest table: Spider v0.1 is interpreted (native compilation is milestone M8), and mature ecosystems are decades ahead. What's checked ✓ is real and tested today.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="num">11.6k+</div><div class="lbl">lines of Rust, zero dependencies</div></div>
+      <div class="stat"><div class="num">1,120+</div><div class="lbl">semantics test cases, all green</div></div>
+      <div class="stat"><div class="num">72</div><div class="lbl">teaching diagnostics (what·why·fix)</div></div>
+      <div class="stat"><div class="num">20 ms</div><div class="lbl">cold start — budget is 50</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="roadmap">
+  <div class="wrap">
+    <p class="kicker">ROADMAP TO 1.0</p>
+    <h2>Built <span class="grad">milestone by milestone.</span></h2>
+    <p class="lead">Each milestone ships compiled, tested, and documented — or it doesn't ship. Six are done; the spec for the rest is public.</p>
+    <div class="roadmap">
+      <span class="mile done">M0 Specs</span>
+      <span class="mile done">M1 Parser</span>
+      <span class="mile done">M2 Types</span>
+      <span class="mile done">M3 Silk VM</span>
+      <span class="mile done">M4 Safe Mode</span>
+      <span class="mile done">M5 Packages</span>
+      <span class="mile done">M6 LSP ½</span>
+      <span class="mile">M7 Concurrency</span>
+      <span class="mile">M8 Native + WASM</span>
+      <span class="mile">M9 Debugger</span>
+      <span class="mile">M10 v1.0</span>
+    </div>
+  </div>
+</section>
+
+<section id="founder">
+  <div class="wrap">
+    <p class="kicker">THE FOUNDER</p>
+    <h2>Built by a <span class="grad">human</span>, with an AI co-author.</h2>
+    <div class="founder" style="margin-top:34px">
+      <img src="founder.png" alt="Kv Avinash Sarma">
+      <div class="info">
+        <h3>Kv Avinash Sarma</h3>
+        <div class="role">Founder, Spider Programming Language</div>
+        <p>Avinash founded Spider with one uncompromising idea: programming should be as easy as speaking — without ever becoming a toy. He designed and built Spider in collaboration with Claude (Anthropic) as co-author: specification, compiler, Silk VM, toolchain, and this site.</p>
+        <div class="social">
+          <a class="btn ghost" href="https://linkedin.com/in/avinashsarma" target="_blank">in&nbsp; LinkedIn</a>
+          <a class="btn ghost" href="https://github.com/kvAvinashsarma-dev" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>🕷️ <strong>Spider</strong> — spin something. · <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">Source on GitHub</a></div>
+    <div>Founded by <a href="https://linkedin.com/in/avinashsarma" target="_blank">Kv Avinash Sarma</a> · co-authored with Claude</div>
+  </div>
+</footer>
+
+</body>
+</html>

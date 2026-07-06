@@ -2,6 +2,11 @@
 
 > Programming should be as easy as speaking — without ever becoming a toy.
 
+**🕸️ Website & browser playground: [spider-lang.vercel.app](https://spider-lang.vercel.app)** —
+write and run real Spider in your browser (the actual compiler + Silk VM as
+WebAssembly), and learn to code at
+[spider-lang.vercel.app/learn](https://spider-lang.vercel.app/learn).
+
 **Spider** is a new programming language with one uncompromising thesis: the easiest
 language in the world to learn, read, and debug can also be a production-grade,
 memory-safe, natively-compiled systems platform. Easy surface. Industrial core.

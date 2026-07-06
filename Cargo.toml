@@ -7,8 +7,15 @@ members = [
     "crates/spider-fmt",
     "crates/spider-web",
     "crates/spider-lsp",
+    "crates/spider-playground",
     "crates/spider-cli",
 ]
+
+# Small wasm for the browser playground; native binaries are unaffected in
+# any way that matters at M-scale (perf work is M8).
+[profile.release]
+opt-level = "s"
+lto = true
 
 [workspace.package]
 version = "0.1.0"

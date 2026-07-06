@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learn Spider — programming from zero, in your browser</title>
+<meta name="description" content="Learn to program with Spider: ten tiny lessons, every example editable and runnable in your browser on the real compiler.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕷️</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="mark">🕷️</span> SPIDER</a>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a href="playground.html">Playground</a>
+      <a href="learn.html" class="active">Learn</a>
+      <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language#readme" target="_blank">Docs</a>
+    </div>
+    <a class="btn ghost" href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">★ GitHub</a>
+  </div>
+</nav>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">LEARN TO CODE</p>
+    <h2>Your first program is <span class="grad">30 seconds away.</span></h2>
+    <p class="lead">Ten tiny lessons. Every example is editable and runs the real Spider compiler in your browser — change things, break things, and read what the compiler tells you: it's a teacher, not a judge.</p>
+
+    <div class="lesson">
+      <h3><span class="lnum">1.</span> Say something</h3>
+      <p><code>say</code> prints a line. Text lives between quotes. Press <strong>Run</strong> — congratulations, you're a programmer.</p>
+      <div class="embed" data-code="say%20%22Hello%2C%20world!%22%0Asay%20%22I%20am%20writing%20Spider%20%F0%9F%95%B7%EF%B8%8F%22%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">2.</span> Name your values</h3>
+      <p><code>let</code> names a value that never changes; <code>var</code> names one that can. Weave any value into text with braces: <code>{like_this}</code>.</p>
+      <div class="embed" data-code="let%20pi%20%3D%203.14159%0Avar%20score%20%3D%200%0Ascore%20%2B%3D%2010%0Asay%20%22pi%20is%20{pi}%20and%20your%20score%20is%20{score}%22%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">3.</span> Ask questions</h3>
+      <p><code>ask</code> shows a question and hands back the answer as Text. (In the browser, type answers in the small box — one per line.)</p>
+      <div class="embed" data-input="Ada" data-code="let%20name%20%3D%20ask%20%22What%20is%20your%20name%3F%22%0Asay%20%22Nice%20to%20meet%20you%2C%20{name}!%22%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">4.</span> Make decisions</h3>
+      <p><code>if</code> runs its indented lines only when the condition is true. Blocks are shown by indenting <strong>4 spaces</strong> — what you see is what the computer sees.</p>
+      <div class="embed" data-code="let%20age%20%3D%2012%0A%0Aif%20age%20%3E%3D%2013%0A%20%20%20%20say%20%22teenager%20or%20older%22%0Aelse%20if%20age%20%3E%3D%203%0A%20%20%20%20say%20%22kid%22%0Aelse%0A%20%20%20%20say%20%22toddler%22%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">5.</span> Repeat yourself (without repeating yourself)</h3>
+      <p>Three loops, each reading like a sentence: <code>repeat 3 times</code>, <code>for item in items</code>, and <code>for i in 1 to 10</code>.</p>
+      <div class="embed" data-code="repeat%203%20times%0A%20%20%20%20say%20%22hip%20hip%20hooray!%22%0A%0Avar%20total%20%3D%200%0Afor%20i%20in%201%20to%2010%0A%20%20%20%20total%20%2B%3D%20i%0Asay%20%221%20to%2010%20adds%20up%20to%20{total}%22%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">6.</span> Teach the computer a recipe</h3>
+      <p><code>fn</code> creates a function — a named recipe. Give it ingredients (parameters, with their types) and it can hand back a result with <code>return</code>.</p>
+      <div class="embed" data-code="fn%20double(n%3A%20Int)%20-%3E%20Int%0A%20%20%20%20return%20n%20*%202%0A%0Afn%20greet(name%3A%20Text)%0A%20%20%20%20say%20%22Hello%2C%20{name}!%22%0A%0Agreet(%22Grace%22)%0Asay%20double(21)%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">7.</span> Collections: lists and maps</h3>
+      <p>A <code>List</code> keeps things in order; a <code>Map</code> connects keys to values. Positions count from 0.</p>
+      <div class="embed" data-code="var%20scores%20%3D%20%5B90%2C%2085%2C%2077%5D%0Ascores.push(100)%0Asay%20scores.sort()%0Asay%20%22first%20position%3A%20{scores%5B0%5D}%22%0A%0Alet%20ages%20%3D%20%7B%22Ada%22%3A%2012%2C%20%22Lin%22%3A%2011%7D%0Asay%20ages.keys()%0Asay%20ages%5B%22Ada%22%5D%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">8.</span> Your own kinds of values</h3>
+      <p><code>record</code> bundles named fields; <code>choice</code> is exactly one of several cases; <code>match</code> handles every case — and Spider <em>checks</em> you didn't forget one. Try deleting the <code>Dot</code> line of the match and see.</p>
+      <div class="embed" data-code="record%20Point%0A%20%20%20%20x%3A%20Float%0A%20%20%20%20y%3A%20Float%0A%0Achoice%20Shape%0A%20%20%20%20Circle(radius%3A%20Float)%0A%20%20%20%20Dot%0A%0Afn%20describe(shape%3A%20Shape)%20-%3E%20Text%0A%20%20%20%20match%20shape%0A%20%20%20%20%20%20%20%20Circle(r)%20-%3E%20%22a%20circle%20of%20radius%20{r}%22%0A%20%20%20%20%20%20%20%20Dot%20-%3E%20%22a%20tiny%20dot%22%0A%0Asay%20describe(Circle(2.0))%0Asay%20Point(1.0%2C%202.0)%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">9.</span> When things can fail</h3>
+      <p>Spider has no exceptions and no null. A function that can fail says so — it returns an <code>Outcome</code> — and <code>try</code> unwraps it with a fallback. Honest failure, no surprises.</p>
+      <div class="embed" data-code="fn%20half(n%3A%20Int)%20-%3E%20Outcome%20of%20Int%0A%20%20%20%20if%20n%20%25%202%20%3D%3D%200%0A%20%20%20%20%20%20%20%20return%20Ok(n%20%2F%202)%0A%20%20%20%20return%20Fail(%22{n}%20is%20odd%22)%0A%0Asay%20try%20half(10)%20else%200%0A%0Amatch%20half(7)%0A%20%20%20%20Ok(v)%20-%3E%20say%20v%0A%20%20%20%20Fail(problem)%20-%3E%20say%20%22could%20not%3A%20{problem}%22%0A"></div>
+    </div>
+
+    <div class="lesson">
+      <h3><span class="lnum">10.</span> Break something — on purpose</h3>
+      <p>The most important lesson: <strong>errors are how the compiler teaches you.</strong> Run this as-is and read the message — what happened, why, how to fix. Then fix it and run again.</p>
+      <div class="embed" data-code="let%20total%20%3D%205%0Asay%20totl%0A"></div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px">
+      <p class="lead" style="margin-bottom:20px">That's the whole core. Now spin something of your own.</p>
+      <a class="btn" href="playground.html">🕸️ Open the full Playground</a>
+      <a class="btn ghost" href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">Install Spider locally</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>🕷️ <strong>Spider</strong> — spin something. · <a href="https://github.com/kvAvinashsarma-dev/Spider-Programming-Language" target="_blank">Source on GitHub</a></div>
+    <div>Founded by <a href="https://linkedin.com/in/avinashsarma" target="_blank">Kv Avinash Sarma</a> · co-authored with Claude</div>
+  </div>
+</footer>
+
+<script src="spider.js"></script>
+</body>
+</html>

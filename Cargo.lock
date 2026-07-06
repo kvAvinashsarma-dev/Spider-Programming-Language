@@ -37,6 +37,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "spider-playground"
+version = "0.1.0"
+dependencies = [
+ "spider-hir",
+ "spider-silk",
+ "spider-syntax",
+]
+
+[[package]]
 name = "spider-silk"
 version = "0.1.0"
 dependencies = [
