@@ -108,6 +108,12 @@ td:first-child, th:first-child { text-align: left; color: var(--text); }
 .stat .num { font-size: 30px; font-weight: 800; color: var(--accent2); }
 .stat .lbl { color: var(--muted); font-size: 13px; margin-top: 6px; }
 
+/* download */
+.dlgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 780px; margin: 0 auto 22px; }
+.dlcard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 26px; text-align: center; }
+.dlcard h3 { font-size: 17px; margin-bottom: 10px; }
+.dlcard p { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+
 /* roadmap */
 .roadmap { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .mile { padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border); font-size: 13px; color: var(--muted); }
@@ -162,6 +168,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
   h1 { font-size: 40px; }
   .grid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
+  .dlgrid { grid-template-columns: 1fr; }
   .pg { grid-template-columns: 1fr; }
   .founder { flex-direction: column; text-align: center; }
   .founder .social { justify-content: center; }

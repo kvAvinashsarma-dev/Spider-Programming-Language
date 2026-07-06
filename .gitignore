@@ -2,3 +2,5 @@
 **/*.rs.bk
 
 website/.vercel/
+
+/spider-cli.cmd
